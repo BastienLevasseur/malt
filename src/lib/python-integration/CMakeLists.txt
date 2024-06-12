@@ -2,8 +2,15 @@
 
 ######################################################
 set(MALT_LIB_SRC
-    PythonBacktraceStack.cpp
+    DummyAllocationMap.cpp
     DummyLocation.cpp
+    DummyStatistics.cpp
+
+    MaltPythonAllocator.cpp
+
+    PythonAllocatorDomain.hpp    
+    PythonBacktraceStack.cpp
+    PythonHandler.cpp
 )
 
 ######################################################
