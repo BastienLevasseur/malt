@@ -10,6 +10,8 @@
 #Find
 find_package(LibElf QUIET)
 find_package(Libunwind QUIET)
+#maltPythonIntegration Search for a Python3 interpreter and development kit
+find_package(Python3 COMPONENTS Interpreter Development QUIET)
 
 ######################################################
 #set default
@@ -20,6 +22,7 @@ else (LIBUNWIND_FOUND)
 endif (LIBUNWIND_FOUND)
 
 ######################################################
+#maltPythonIntegration TODO: Do we have to add something here?
 #Code options
 set(ENABLE_CODE_TIMING   "no"       CACHE BOOL   "Enable some tricks to quickly check timings of hostspots of MALT internal code.")
 
@@ -64,6 +67,9 @@ include_directories(../../extern-deps/iniparser/src)
 include_directories(../../extern-deps/from-htopml)
 include_directories(${CMAKE_CURRENT_BINARY_DIR})
 
+#maltPythonIntegration Add the Python Directory
+include_directories(${Python3_INCLUDE_DIRS})
+
 ######################################################
 set(COMMON_OBJS $<TARGET_OBJECTS:htopml-json>
                 $<TARGET_OBJECTS:malt-core>
@@ -76,7 +82,11 @@ set(COMMON_OBJS $<TARGET_OBJECTS:htopml-json>
                 $<TARGET_OBJECTS:malt-stack-trees>
                 $<TARGET_OBJECTS:malt-common>
                 $<TARGET_OBJECTS:malt-port>
-                $<TARGET_OBJECTS:iniparser>)
+                $<TARGET_OBJECTS:iniparser>
+
+                #maltPythonIntegration Add the Python Integration object
+                $<TARGET_OBJECTS:malt-python-integration>
+                )
 
 ######################################################
 add_library(malt-base SHARED ${COMMON_OBJS})
@@ -96,6 +106,13 @@ set_target_properties(malt-controler PROPERTIES VERSION ${MALT_VERSION}
                                                 SOVERSION ${MALT_SO_VERSION})
 
 ######################################################
+
+#maltPythonIntegration TODO: Do we have to add a lib here ?
+#add_library(malt-python-integration-lib SHARED $<TARGET_OBJECTS:malt-fake-controler>)
+#set_target_properties(malt-python-integration-lib PROPERTIES VERSION ${MALT_VERSION}
+#                                               SOVERSION ${MALT_SO_VERSION})
+
+######################################################
 add_subdirectory(core)
 add_subdirectory(tools)
 add_subdirectory(common)
@@ -105,6 +122,9 @@ add_subdirectory(wrapper)
 add_subdirectory(profiler)
 add_subdirectory(stack-tree)
 add_subdirectory(portability)
+
+#maltPythonIntegration Add the python-integration directory
+add_subdirectory(python-integration)
 
 ######################################################
 if (ENABLE_TESTS)
