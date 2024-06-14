@@ -29,13 +29,14 @@ typedef struct MaltPythonAllocator{
     size_t recursiveFault;
 } MaltPythonAllocator_t;
 
-void initialiseMaltPythonAllocator(PythonHandler* pythonHandler);
-void destroyMaltPythonAllocator(void);
+MaltPythonAllocator_t* initialiseMaltPythonAllocator(PythonHandler* pythonHandler);
+void destroyMaltPythonAllocator(MaltPythonAllocator_t* maltAllocator);
 
-void enableMaltPythonAllocator(void);
-void disableMaltPythonAllocator(void);
+void enableMaltPythonAllocator(MaltPythonAllocator_t* maltAllocator);
+void disableMaltPythonAllocator(MaltPythonAllocator_t* maltAllocator);
 
-void printRecursiveFault(void);
+void printRecursiveFault(MaltPythonAllocator_t* maltAllocator);
 }
+
 #endif //MaltPythonAllocator_hpp
 

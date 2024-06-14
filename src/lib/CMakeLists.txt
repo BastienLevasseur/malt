@@ -10,8 +10,6 @@
 #Find
 find_package(LibElf QUIET)
 find_package(Libunwind QUIET)
-#maltPythonIntegration Search for a Python3 interpreter and development kit
-find_package(Python3 COMPONENTS Interpreter Development QUIET)
 
 ######################################################
 #set default
@@ -104,13 +102,6 @@ set_target_properties(malt PROPERTIES VERSION ${MALT_VERSION}
 add_library(malt-controler SHARED $<TARGET_OBJECTS:malt-fake-controler>)
 set_target_properties(malt-controler PROPERTIES VERSION ${MALT_VERSION}
                                                 SOVERSION ${MALT_SO_VERSION})
-
-######################################################
-
-#maltPythonIntegration TODO: Do we have to add a lib here ?
-#add_library(malt-python-integration-lib SHARED $<TARGET_OBJECTS:malt-fake-controler>)
-#set_target_properties(malt-python-integration-lib PROPERTIES VERSION ${MALT_VERSION}
-#                                               SOVERSION ${MALT_SO_VERSION})
 
 ######################################################
 add_subdirectory(core)

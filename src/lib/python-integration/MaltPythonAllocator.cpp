@@ -278,12 +278,11 @@ static void* Malt_PyObject_Realloc(void* ctx, void *ptr, size_t new_size){
 	return gblMaltPythonAllocator->originalAllocatorObj->realloc(ctx, ptr, new_size);
 }
 
-
 /**
  * Constructor for the custom allocator, fetches the Python original allocator and initialises the custom malt Python allocator
  * that will profile incomming Python's malloc/free/calloc/realloc
  */
-void initialiseMaltPythonAllocator(PythonHandler* pythonHandler){
+MaltPythonAllocator_t* initialiseMaltPythonAllocator(PythonHandler* pythonHandler){
 	assert(gblMaltPythonAllocator == nullptr);
 	gblMaltPythonAllocator = new MaltPythonAllocator();
 
@@ -327,6 +326,8 @@ void initialiseMaltPythonAllocator(PythonHandler* pythonHandler){
 	PyMem_SetAllocator(PYMEM_DOMAIN_RAW, gblMaltPythonAllocator->maltAllocatorRaw);
 	PyMem_SetAllocator(PYMEM_DOMAIN_MEM, gblMaltPythonAllocator->maltAllocatorMem);
 	PyMem_SetAllocator(PYMEM_DOMAIN_OBJ, gblMaltPythonAllocator->maltAllocatorObj);
+
+	return gblMaltPythonAllocator;
 }
 
 
@@ -334,55 +335,55 @@ void initialiseMaltPythonAllocator(PythonHandler* pythonHandler){
  * Destroys MALT custom Python allocator
  * It needs to be disabled beforehand
  */
-void destroyMaltPythonAllocator(void){
-	assert(gblMaltPythonAllocator->enabledFlag == false);
-	assert(gblMaltPythonAllocator->recursiveGuard == false);
+void destroyMaltPythonAllocator(MaltPythonAllocator_t* maltAllocator){
+	assert(maltAllocator->enabledFlag == false);
+	assert(maltAllocator->recursiveGuard == false);
 
 	//First the malt custom allocator
-	delete gblMaltPythonAllocator->maltAllocatorRaw;
-	delete gblMaltPythonAllocator->maltAllocatorMem;
-	delete gblMaltPythonAllocator->maltAllocatorObj;
+	delete maltAllocator->maltAllocatorRaw;
+	delete maltAllocator->maltAllocatorMem;
+	delete maltAllocator->maltAllocatorObj;
 
 	//Then the original Python allocator
-	delete gblMaltPythonAllocator->originalAllocatorRaw;
-	delete gblMaltPythonAllocator->originalAllocatorMem;
-	delete gblMaltPythonAllocator->originalAllocatorObj;
+	delete maltAllocator->originalAllocatorRaw;
+	delete maltAllocator->originalAllocatorMem;
+	delete maltAllocator->originalAllocatorObj;
 
-	gblMaltPythonAllocator = nullptr;
+	maltAllocator = nullptr;
 }
 
 
 /**
  * Enables MALT custom Python Allocator
  */
-void enableMaltPythonAllocator(void){
+void enableMaltPythonAllocator(MaltPythonAllocator_t* maltAllocator){
 	assert(gblMaltPythonAllocator->enabledFlag == false);
-	gblMaltPythonAllocator->enabledFlag = true;
+	maltAllocator->enabledFlag = true;
 
 	//Set MALT custom Python allocator as the Python allocator
-	PyMem_SetAllocator(PYMEM_DOMAIN_RAW, gblMaltPythonAllocator->maltAllocatorRaw);
-	PyMem_SetAllocator(PYMEM_DOMAIN_MEM, gblMaltPythonAllocator->maltAllocatorMem);
-	PyMem_SetAllocator(PYMEM_DOMAIN_OBJ, gblMaltPythonAllocator->maltAllocatorObj);
+	PyMem_SetAllocator(PYMEM_DOMAIN_RAW, maltAllocator->maltAllocatorRaw);
+	PyMem_SetAllocator(PYMEM_DOMAIN_MEM, maltAllocator->maltAllocatorMem);
+	PyMem_SetAllocator(PYMEM_DOMAIN_OBJ, maltAllocator->maltAllocatorObj);
 }
 
 
 /**
  * Disables MALT custom Python Allocator
  */
-void disableMaltPythonAllocator(void){
-	assert(gblMaltPythonAllocator->enabledFlag == true);
-	gblMaltPythonAllocator->enabledFlag = false;
+void disableMaltPythonAllocator(MaltPythonAllocator_t* maltAllocator){
+	assert(maltAllocator->enabledFlag == true);
+	maltAllocator->enabledFlag = false;
 
 	//Set the Original Python allocator as the Python allocator i.e: removes MALT Python allocator
-	PyMem_SetAllocator(PYMEM_DOMAIN_RAW, gblMaltPythonAllocator->originalAllocatorRaw);
-	PyMem_SetAllocator(PYMEM_DOMAIN_MEM, gblMaltPythonAllocator->originalAllocatorMem);
-	PyMem_SetAllocator(PYMEM_DOMAIN_OBJ, gblMaltPythonAllocator->originalAllocatorObj);
+	PyMem_SetAllocator(PYMEM_DOMAIN_RAW, maltAllocator->originalAllocatorRaw);
+	PyMem_SetAllocator(PYMEM_DOMAIN_MEM, maltAllocator->originalAllocatorMem);
+	PyMem_SetAllocator(PYMEM_DOMAIN_OBJ, maltAllocator->originalAllocatorObj);
 }
 
 /**
  * FIXME: Debbuging purposes, will be removed
  */
-void printRecursiveFault(void){
-	std::cout << gblMaltPythonAllocator->recursiveFault << " recursive faults" << std::endl;
+void printRecursiveFault(MaltPythonAllocator_t* maltAllocator){
+	std::cout << maltAllocator->recursiveFault << " recursive faults" << std::endl;
 }
 }
