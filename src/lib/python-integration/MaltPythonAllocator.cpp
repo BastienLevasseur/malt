@@ -268,8 +268,20 @@ void* Malt_PyObject_Realloc(void* ctx, void *ptr, size_t new_size){
 	return gblMaltPythonAllocator->originalAllocator->allocatorObj->realloc(ctx, ptr, new_size);
 }
 
+/* Get the three Python allocators corresponding to the three domains */
+void getPythonAllocatorFunctions(PythonAllocator_t* pythonAllocator){
+	PyMem_GetAllocator(PYMEM_DOMAIN_RAW, pythonAllocator->allocatorRaw);
+	PyMem_GetAllocator(PYMEM_DOMAIN_MEM, pythonAllocator->allocatorMem);
+	PyMem_GetAllocator(PYMEM_DOMAIN_OBJ, pythonAllocator->allocatorObj);
+}
 
 
+/* Set the three Python allocators corresponding to the three domains */
+void setPythonAllocatorFunctions(PythonAllocator_t* pythonAllocator){
+	PyMem_SetAllocator(PYMEM_DOMAIN_RAW, pythonAllocator->allocatorRaw);
+	PyMem_SetAllocator(PYMEM_DOMAIN_MEM, pythonAllocator->allocatorMem);
+	PyMem_SetAllocator(PYMEM_DOMAIN_OBJ, pythonAllocator->allocatorObj);
+}
 
 /** Initialises a Python Allocator */
 PythonAllocator_t* initialisePythonAllocator(){
@@ -304,10 +316,8 @@ MaltPythonAllocator_t* initialiseMaltPythonAllocator(PythonHandler* pythonHandle
 	maltPythonAllocator->originalAllocator = initialisePythonAllocator();
 	
 	//Populate it with the orginal allocator function pointers
-	PyMem_GetAllocator(PYMEM_DOMAIN_RAW, maltPythonAllocator->originalAllocator->allocatorRaw);
-	PyMem_GetAllocator(PYMEM_DOMAIN_MEM, maltPythonAllocator->originalAllocator->allocatorMem);
-	PyMem_GetAllocator(PYMEM_DOMAIN_OBJ, maltPythonAllocator->originalAllocator->allocatorObj);
-
+	getPythonAllocatorFunctions(maltPythonAllocator->originalAllocator);
+	
 	//Init our MALT custom Python allocator
 	maltPythonAllocator->customAllocator = initialisePythonAllocator();
 
@@ -357,27 +367,25 @@ void destroyMaltPythonAllocator(MaltPythonAllocator_t* maltPythonAllocator){
  * Enables MALT custom Python Allocator
  */
 void enableMaltPythonAllocator(MaltPythonAllocator_t* maltPythonAllocator){
-	assert(gblMaltPythonAllocator->enabledFlag == false);
+	assert(maltPythonAllocator != nullptr);
+	assert(maltPythonAllocator->enabledFlag == false);
 	maltPythonAllocator->enabledFlag = true;
 
+	std::cout << "Setting the allocators..." << std::endl;
 	//Set MALT custom Python allocator as the Python allocator
-	PyMem_SetAllocator(PYMEM_DOMAIN_RAW, maltPythonAllocator->customAllocator->allocatorRaw);
-	PyMem_SetAllocator(PYMEM_DOMAIN_MEM, maltPythonAllocator->customAllocator->allocatorMem);
-	PyMem_SetAllocator(PYMEM_DOMAIN_OBJ, maltPythonAllocator->customAllocator->allocatorObj);
+	setPythonAllocatorFunctions(maltPythonAllocator->customAllocator);
 }
 
 
 /**
  * Disables MALT custom Python Allocator
  */
-void disableMaltPythonAllocator(MaltPythonAllocator_t* maltAllocator){
-	assert(maltAllocator->enabledFlag == true);
-	maltAllocator->enabledFlag = false;
+void disableMaltPythonAllocator(MaltPythonAllocator_t* maltPythonAllocator){
+	assert(maltPythonAllocator->enabledFlag == true);
+	maltPythonAllocator->enabledFlag = false;
 
 	//Set the Original Python allocator as the Python allocator i.e: removes MALT Python allocator
-	PyMem_SetAllocator(PYMEM_DOMAIN_RAW, maltAllocator->originalAllocator->allocatorRaw);
-	PyMem_SetAllocator(PYMEM_DOMAIN_MEM, maltAllocator->originalAllocator->allocatorMem);
-	PyMem_SetAllocator(PYMEM_DOMAIN_OBJ, maltAllocator->originalAllocator->allocatorObj);
+	setPythonAllocatorFunctions(maltPythonAllocator->originalAllocator);
 }
 
 
