@@ -38,13 +38,13 @@ void setPythonAllocatorFunctions(PythonAllocator_t* pythonAllocator);
 PythonAllocator_t* initialisePythonAllocator();
 void destroyPythonAllocator(PythonAllocator_t* pythonAllocator);
 
-MaltPythonAllocator_t* initialiseMaltPythonAllocator(PythonHandler* pythonHandler);
+void initialiseMaltPythonAllocator(PythonHandler* pythonHandler);
 void destroyMaltPythonAllocator(MaltPythonAllocator_t* maltPythonAllocator);
 
 void enableMaltPythonAllocator(MaltPythonAllocator_t* maltPythonAllocator);
 void disableMaltPythonAllocator(MaltPythonAllocator_t* maltPythonAllocator);
 
-
+MaltPythonAllocator_t* getGlobalMaltPythonAllocator();
 }
 
 #endif //MaltPythonAllocator_hpp

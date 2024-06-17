@@ -3,7 +3,7 @@
 #include "PythonAllocatorDomain.hpp"
 
 namespace MALT{
-static MaltPythonAllocator* gblMaltPythonAllocator = nullptr;
+static MaltPythonAllocator_t* gblMaltPythonAllocator = nullptr;
 
 /* If size (re)alloced is zero we allocate one byte to avoid returning NULL */
 
@@ -306,44 +306,42 @@ void destroyPythonAllocator(PythonAllocator_t* pythonAllocator){
  * Constructor for the custom allocator, fetches the Python original allocator and initialises the custom malt Python allocator
  * that will profile incomming Python's malloc/free/calloc/realloc
  */
-MaltPythonAllocator_t* initialiseMaltPythonAllocator(PythonHandler* pythonHandler){
+void initialiseMaltPythonAllocator(PythonHandler* pythonHandler){
 	assert(gblMaltPythonAllocator == nullptr);
-	MaltPythonAllocator_t* maltPythonAllocator = new MaltPythonAllocator_t();
+	gblMaltPythonAllocator = new MaltPythonAllocator_t();
 
-	maltPythonAllocator->maltPythonHandler = pythonHandler;
+	gblMaltPythonAllocator->maltPythonHandler = pythonHandler;
 
 	//Init the original Python allocator
-	maltPythonAllocator->originalAllocator = initialisePythonAllocator();
+	gblMaltPythonAllocator->originalAllocator = initialisePythonAllocator();
 	
 	//Populate it with the orginal allocator function pointers
-	getPythonAllocatorFunctions(maltPythonAllocator->originalAllocator);
+	getPythonAllocatorFunctions(gblMaltPythonAllocator->originalAllocator);
 	
 	//Init our MALT custom Python allocator
-	maltPythonAllocator->customAllocator = initialisePythonAllocator();
+	gblMaltPythonAllocator->customAllocator = initialisePythonAllocator();
 
 	//Populate it with our own functions for each domain
 	//Raw Domain
-	maltPythonAllocator->customAllocator->allocatorRaw->malloc = Malt_PyMem_RawMalloc;
-	maltPythonAllocator->customAllocator->allocatorRaw->free = Malt_PyMem_RawFree;
-	maltPythonAllocator->customAllocator->allocatorRaw->calloc = Malt_PyMem_RawCalloc;
-	maltPythonAllocator->customAllocator->allocatorRaw->realloc = Malt_PyMem_RawRealloc;
+	gblMaltPythonAllocator->customAllocator->allocatorRaw->malloc = Malt_PyMem_RawMalloc;
+	gblMaltPythonAllocator->customAllocator->allocatorRaw->free = Malt_PyMem_RawFree;
+	gblMaltPythonAllocator->customAllocator->allocatorRaw->calloc = Malt_PyMem_RawCalloc;
+	gblMaltPythonAllocator->customAllocator->allocatorRaw->realloc = Malt_PyMem_RawRealloc;
 
 	//Mem domain
-	maltPythonAllocator->customAllocator->allocatorMem->malloc = Malt_PyMem_Malloc;
-	maltPythonAllocator->customAllocator->allocatorMem->free = Malt_PyMem_Free;
-	maltPythonAllocator->customAllocator->allocatorMem->calloc = Malt_PyMem_Calloc;
-	maltPythonAllocator->customAllocator->allocatorMem->realloc = Malt_PyMem_Realloc;
+	gblMaltPythonAllocator->customAllocator->allocatorMem->malloc = Malt_PyMem_Malloc;
+	gblMaltPythonAllocator->customAllocator->allocatorMem->free = Malt_PyMem_Free;
+	gblMaltPythonAllocator->customAllocator->allocatorMem->calloc = Malt_PyMem_Calloc;
+	gblMaltPythonAllocator->customAllocator->allocatorMem->realloc = Malt_PyMem_Realloc;
 
 	//Obj domain
-	maltPythonAllocator->customAllocator->allocatorObj->malloc = Malt_PyObject_Malloc;
-	maltPythonAllocator->customAllocator->allocatorObj->free = Malt_PyObject_Free;
-	maltPythonAllocator->customAllocator->allocatorObj->calloc = Malt_PyObject_Calloc;
-	maltPythonAllocator->customAllocator->allocatorObj->realloc = Malt_PyObject_Realloc;
+	gblMaltPythonAllocator->customAllocator->allocatorObj->malloc = Malt_PyObject_Malloc;
+	gblMaltPythonAllocator->customAllocator->allocatorObj->free = Malt_PyObject_Free;
+	gblMaltPythonAllocator->customAllocator->allocatorObj->calloc = Malt_PyObject_Calloc;
+	gblMaltPythonAllocator->customAllocator->allocatorObj->realloc = Malt_PyObject_Realloc;
 
-	maltPythonAllocator->recursiveGuard = false;
-	maltPythonAllocator->enabledFlag = false;
-
-	return maltPythonAllocator;
+	gblMaltPythonAllocator->recursiveGuard = false;
+	gblMaltPythonAllocator->enabledFlag = false;
 }
 
 
@@ -388,5 +386,9 @@ void disableMaltPythonAllocator(MaltPythonAllocator_t* maltPythonAllocator){
 	setPythonAllocatorFunctions(maltPythonAllocator->originalAllocator);
 }
 
+
+MaltPythonAllocator_t* getGlobalMaltPythonAllocator(){
+	return gblMaltPythonAllocator;
+}
 
 }

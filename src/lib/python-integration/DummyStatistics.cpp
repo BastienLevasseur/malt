@@ -60,7 +60,6 @@ void DummyStatistics::ptrIncoherenceCountUp(const PythonAllocatorDomain &ptrInco
 void DummyStatistics::mallocSumUp(const PythonAllocatorDomain& mallocDomain, size_t mallocSize){
     this->getDomainStatistics(mallocDomain).sumAlloc += mallocSize;
     this->getDomainStatistics(mallocDomain).allocationMap.insertAlloc(mallocSize);
-    std::cout << "Added " << mallocSize << "into the malloc sum of some domain " << std::endl;
 }
 
 void DummyStatistics::callocSumUp(const PythonAllocatorDomain& callocDomain, size_t callocSize){

@@ -115,7 +115,9 @@ int main(int argc, char** argv){
     
     getPythonAllocatorFunctions(gblOldPythonAllocator);
 
-	gblMaltPythonAllocator = initialiseMaltPythonAllocator(pythonHandler);
+	initialiseMaltPythonAllocator(pythonHandler);
+    gblMaltPythonAllocator = getGlobalMaltPythonAllocator();
+    
     enableMaltPythonAllocator(gblMaltPythonAllocator);
     
     gblNewPythonAllocator = initialisePythonAllocator();
