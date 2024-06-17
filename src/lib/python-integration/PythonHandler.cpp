@@ -7,20 +7,22 @@
 
 namespace MALT {
 
-PythonHandler::PythonHandler(){
-	this->dummyStats = new DummyStatistics();
+PythonHandler::PythonHandler(DummyStatistics* dummyStats){
+	this->dummyStats = dummyStats;
 }
 
 
 PythonHandler::~PythonHandler(){
-	delete this->dummyStats;
+	//delete this->dummyStats;
 }
 
 /**
  * Handles a Python malloc, fetch the backtrace stack and print it, updates statistics
  * FIXME: Behavior will change at some point to use MALT internals 
  */
-void PythonHandler::maltLogPythonAlloc(PythonAllocatorDomain pyMallocDomain, size_t size){
+void PythonHandler::maltLogPythonAlloc(const PythonAllocatorDomain& pyMallocDomain, size_t size){
+	assert(size != 0);
+	
 	this->dummyStats->mallocCountUp(pyMallocDomain);
 	this->dummyStats->mallocSumUp(pyMallocDomain, size);
 
@@ -36,7 +38,7 @@ void PythonHandler::maltLogPythonAlloc(PythonAllocatorDomain pyMallocDomain, siz
  * Handles a Python free, fetch the backtrace stack and print it, updates statistics
  * FIXME: Behavior will change at some point to use MALT internals 
  */
-void PythonHandler::maltLogPythonFree(PythonAllocatorDomain pyMallocDomain, void* freePtr){
+void PythonHandler::maltLogPythonFree(const PythonAllocatorDomain& pyMallocDomain, void* freePtr){
 	MALT_PYTHON_UNUSED(freePtr);
 	this->dummyStats->freeCountUp(pyMallocDomain);
 	
@@ -52,8 +54,9 @@ void PythonHandler::maltLogPythonFree(PythonAllocatorDomain pyMallocDomain, void
  * Handles a Python calloc, fetch the backtrace stack and print it, updates statistics
  * FIXME: Behavior will change at some point to use MALT internals 
  */
-void PythonHandler::maltLogPythonCalloc(PythonAllocatorDomain pyMallocDomain, size_t nbElements, size_t elementSize){
-	
+void PythonHandler::maltLogPythonCalloc(const PythonAllocatorDomain& pyMallocDomain, size_t nbElements, size_t elementSize){
+	assert(nbElements != 0);
+	assert(elementSize != 0);
 	this->dummyStats->callocCountUp(pyMallocDomain);
 	this->dummyStats->callocSumUp(pyMallocDomain, nbElements*elementSize);
 
@@ -69,9 +72,10 @@ void PythonHandler::maltLogPythonCalloc(PythonAllocatorDomain pyMallocDomain, si
  * Handles a Python realloc, fetch the backtrace stack and print it, updates statistics
  * FIXME: Behavior will change at some point to use MALT internals 
  */
-void PythonHandler::maltLogPythonRealloc(PythonAllocatorDomain pyMallocDomain, void* reallocPtr, size_t newSize){
+void PythonHandler::maltLogPythonRealloc(const PythonAllocatorDomain& pyMallocDomain, void* reallocPtr, size_t newSize){
 	MALT_PYTHON_UNUSED(reallocPtr);
 	MALT_PYTHON_UNUSED(newSize);
+	assert(newSize != 0);
 
 	this->dummyStats->reallocCountUp(pyMallocDomain);
 

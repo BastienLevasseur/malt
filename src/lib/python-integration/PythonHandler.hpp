@@ -13,16 +13,16 @@ namespace MALT {
     class PythonHandler {
             
         public:
-            PythonHandler();
+            PythonHandler(DummyStatistics* dummsyStats);
             ~PythonHandler();
 
-            void maltLogPythonAlloc(PythonAllocatorDomain pyMallocDomain, size_t size);
+            void maltLogPythonAlloc(const PythonAllocatorDomain& pyMallocDomain, size_t size);
 
-            void maltLogPythonFree(PythonAllocatorDomain pyMallocDomain, void* freePtr);
+            void maltLogPythonFree(const PythonAllocatorDomain& pyMallocDomain, void* freePtr);
 
-            void maltLogPythonCalloc(PythonAllocatorDomain pyMallocDomain, size_t nbElements, size_t elementSize);
+            void maltLogPythonCalloc(const PythonAllocatorDomain& pyMallocDomain, size_t nbElements, size_t elementSize);
 
-            void maltLogPythonRealloc(PythonAllocatorDomain pyMallocDomain, void* reallocPtr, size_t newSize);
+            void maltLogPythonRealloc(const PythonAllocatorDomain& pyMallocDomain, void* reallocPtr, size_t newSize);
 
         private:
 

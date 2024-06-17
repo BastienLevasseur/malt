@@ -5,278 +5,290 @@
 namespace MALT{
 static MaltPythonAllocator* gblMaltPythonAllocator = nullptr;
 
+/* If size (re)alloced is zero we allocate one byte to avoid returning NULL */
+
 /**
  * Overlap for the PyMalloc, raw domain, malloc function. 
- */
-static void* Malt_PyMem_RawMalloc(void* ctx, size_t size){
+*/
+void* Malt_PyMem_RawMalloc(void* ctx, size_t size){
 
-	//Reproduces the same behavior as the Python allocator
-	if (size == 0){
-		size = 1;
+	
+	size_t alloced_size = size; 
+	if (alloced_size == 0){
+		alloced_size = 1;
 	}
 
 	if (gblMaltPythonAllocator->enabledFlag == true){
 		if (gblMaltPythonAllocator->recursiveGuard == false){		
 			gblMaltPythonAllocator->recursiveGuard = true;
-			gblMaltPythonAllocator->maltPythonHandler->maltLogPythonAlloc(PYMEM_DOMAIN_RAW, size);
+			gblMaltPythonAllocator->maltPythonHandler->maltLogPythonAlloc(PYMEM_DOMAIN_RAW, alloced_size);
 			gblMaltPythonAllocator->recursiveGuard = false;
-		}else{
-			gblMaltPythonAllocator->recursiveFault++;
 		}
 	}
 
-	return gblMaltPythonAllocator->originalAllocatorRaw->malloc(ctx, size);
+	return gblMaltPythonAllocator->originalAllocator->allocatorRaw->malloc(ctx, size);
 }
 
 /**
  * Overlap for the PyMalloc, raw domain, Free function
  */
-static void Malt_PyMem_RawFree(void* ctx, void* ptr){
+void Malt_PyMem_RawFree(void* ctx, void* ptr){
 
 	if (gblMaltPythonAllocator->enabledFlag == true){
 		if (gblMaltPythonAllocator->recursiveGuard == false){		
 			gblMaltPythonAllocator->recursiveGuard = true;
 			gblMaltPythonAllocator->maltPythonHandler->maltLogPythonFree(PYMEM_DOMAIN_RAW, ptr);
 			gblMaltPythonAllocator->recursiveGuard = false;
-		}else{
-			gblMaltPythonAllocator->recursiveFault++;
 		}
 	}
 
-	gblMaltPythonAllocator->originalAllocatorRaw->free(ctx, ptr);
+	gblMaltPythonAllocator->originalAllocator->allocatorRaw->free(ctx, ptr);
 }
 
 
 /**
  * * Overlap for the Raw domain Calloc function
  */
-static void* Malt_PyMem_RawCalloc(void* ctx, size_t nelem, size_t elsize){
+void* Malt_PyMem_RawCalloc(void* ctx, size_t nelem, size_t elsize){
 
-	//Reproduces the same behavior as the Python allocator
-	if (nelem == 0 || elsize == 0) {
-        nelem = 1;
-        elsize = 1;
+	
+	size_t alloced_nelem = nelem;
+	size_t alloced_elsize = elsize;
+	if (alloced_nelem == 0 || alloced_elsize == 0) {
+        alloced_nelem = 1;
+        alloced_elsize = 1;
     }
 
 	if (gblMaltPythonAllocator->enabledFlag == true){
 		if (gblMaltPythonAllocator->recursiveGuard == false){
 			gblMaltPythonAllocator->recursiveGuard = true;
-			gblMaltPythonAllocator->maltPythonHandler->maltLogPythonCalloc(PYMEM_DOMAIN_RAW, nelem, elsize);
+			gblMaltPythonAllocator->maltPythonHandler->maltLogPythonCalloc(PYMEM_DOMAIN_RAW, alloced_nelem, alloced_elsize);
 			gblMaltPythonAllocator->recursiveGuard = false;
-		}else{
-			gblMaltPythonAllocator->recursiveFault++;
 		}
 	}
 
-	return gblMaltPythonAllocator->originalAllocatorRaw->calloc(ctx, nelem, elsize);
+	return gblMaltPythonAllocator->originalAllocator->allocatorRaw->calloc(ctx, nelem, elsize);
 }
 
 
 /**
  * Overlap for the Raw domain Realloc function
  */
-static void* Malt_PyMem_RawRealloc(void* ctx, void *ptr, size_t new_size){
+void* Malt_PyMem_RawRealloc(void* ctx, void *ptr, size_t new_size){
 	
-	//Reproduces the same behavior as the Python allocator
-	if (new_size == 0){
-		new_size = 1;
+	
+	size_t alloced_new_size = new_size;
+	if (alloced_new_size == 0){
+		alloced_new_size = 1;
 	}
 
 	if (gblMaltPythonAllocator->enabledFlag == true){
 		if (gblMaltPythonAllocator->recursiveGuard == false){
 			gblMaltPythonAllocator->recursiveGuard = true;
-			gblMaltPythonAllocator->maltPythonHandler->maltLogPythonRealloc(PYMEM_DOMAIN_RAW, ptr, new_size);
+			gblMaltPythonAllocator->maltPythonHandler->maltLogPythonRealloc(PYMEM_DOMAIN_RAW, ptr, alloced_new_size);
 			gblMaltPythonAllocator->recursiveGuard = false;
-		}else{
-			gblMaltPythonAllocator->recursiveFault++;
 		}
 	}
 
-	return gblMaltPythonAllocator->originalAllocatorRaw->realloc(ctx, ptr, new_size);
+	return gblMaltPythonAllocator->originalAllocator->allocatorRaw->realloc(ctx, ptr, new_size);
 }
 
 
 /**
  * Overlap for the Mem domain Malloc function
  */
-static void* Malt_PyMem_Malloc(void* ctx, size_t size){
+void* Malt_PyMem_Malloc(void* ctx, size_t size){
 
-	//Reproduces the same behavior as the Python allocator
-	if (size == 0){
-		size = 1;
+	
+	size_t alloced_size = size; 
+	if (alloced_size == 0){
+		alloced_size = 1;
 	}
 
 	if (gblMaltPythonAllocator->enabledFlag == true){
 		if (gblMaltPythonAllocator->recursiveGuard == false){
 			gblMaltPythonAllocator->recursiveGuard = true;
-			gblMaltPythonAllocator->maltPythonHandler->maltLogPythonAlloc(PYMEM_DOMAIN_MEM, size);
+			gblMaltPythonAllocator->maltPythonHandler->maltLogPythonAlloc(PYMEM_DOMAIN_MEM, alloced_size);
 			gblMaltPythonAllocator->recursiveGuard = false;
-		}else{
-			gblMaltPythonAllocator->recursiveFault++;
 		}
 	}
 
-	return gblMaltPythonAllocator->originalAllocatorMem->malloc(ctx, size);
+	return gblMaltPythonAllocator->originalAllocator->allocatorMem->malloc(ctx, size);
 }
 
 
 /**
  * Overlap for the Mem domain Free function
  */
-static void Malt_PyMem_Free(void* ctx, void* ptr){
+void Malt_PyMem_Free(void* ctx, void* ptr){
 
 	if (gblMaltPythonAllocator->enabledFlag == true){
 		if (gblMaltPythonAllocator->recursiveGuard == false){
 			gblMaltPythonAllocator->recursiveGuard = true;
 			gblMaltPythonAllocator->maltPythonHandler->maltLogPythonFree(PYMEM_DOMAIN_MEM, ptr);
 			gblMaltPythonAllocator->recursiveGuard = false;
-		}else{
-			gblMaltPythonAllocator->recursiveFault++;
 		}
 	}
 
-	return gblMaltPythonAllocator->originalAllocatorMem->free(ctx, ptr);
+	return gblMaltPythonAllocator->originalAllocator->allocatorMem->free(ctx, ptr);
 }
 
 
 /**
  * Overlap for the Mem domain Calloc function
  */
-static void* Malt_PyMem_Calloc(void* ctx, size_t nelem, size_t elsize){
+void* Malt_PyMem_Calloc(void* ctx, size_t nelem, size_t elsize){
 
-	//Reproduces the same behavior as the Python allocator
-	if (nelem == 0 || elsize == 0) {
-        nelem = 1;
-        elsize = 1;
+	
+	size_t alloced_nelem = nelem;
+	size_t alloced_elsize = elsize;
+	if (alloced_nelem == 0 || alloced_elsize == 0) {
+        alloced_nelem = 1;
+        alloced_elsize = 1;
     }
 
 	if (gblMaltPythonAllocator->enabledFlag == true){
 		if (gblMaltPythonAllocator->recursiveGuard == false){
 			gblMaltPythonAllocator->recursiveGuard = true;
-			gblMaltPythonAllocator->maltPythonHandler->maltLogPythonCalloc(PYMEM_DOMAIN_MEM, nelem, elsize);
+			gblMaltPythonAllocator->maltPythonHandler->maltLogPythonCalloc(PYMEM_DOMAIN_MEM, alloced_nelem, alloced_elsize);
 			gblMaltPythonAllocator->recursiveGuard = false;	
-		}else{
-			gblMaltPythonAllocator->recursiveFault++;
 		}
 	}
 
-	return gblMaltPythonAllocator->originalAllocatorMem->calloc(ctx, nelem, elsize);
+	return gblMaltPythonAllocator->originalAllocator->allocatorMem->calloc(ctx, nelem, elsize);
 }
 
 
 /**
  * Overlap for the Mem domain Realloc function
  */
-static void* Malt_PyMem_Realloc(void* ctx, void *ptr, size_t new_size){
+void* Malt_PyMem_Realloc(void* ctx, void *ptr, size_t new_size){
 
-	//Reproduces the same behavior as the Python allocator
+	
+	size_t alloced_new_size = new_size;
 	if (new_size == 0){
-		new_size = 1;
+		alloced_new_size = 1;
 	}
 
 	if (gblMaltPythonAllocator->enabledFlag == true){
 		if (gblMaltPythonAllocator->recursiveGuard == false){
 			gblMaltPythonAllocator->recursiveGuard = true;
-			gblMaltPythonAllocator->maltPythonHandler->maltLogPythonRealloc(PYMEM_DOMAIN_MEM, ptr, new_size);
+			gblMaltPythonAllocator->maltPythonHandler->maltLogPythonRealloc(PYMEM_DOMAIN_MEM, ptr, alloced_new_size);
 			gblMaltPythonAllocator->recursiveGuard = false;
-		}else{
-			gblMaltPythonAllocator->recursiveFault++;
 		}
 	}
 
-	return gblMaltPythonAllocator->originalAllocatorMem->realloc(ctx, ptr, new_size);
+	return gblMaltPythonAllocator->originalAllocator->allocatorMem->realloc(ctx, ptr, new_size);
 }
 
 
 /**
  * Overlap for the Obj domain Malloc function
  */
-static void* Malt_PyObject_Malloc(void* ctx, size_t size){
+void* Malt_PyObject_Malloc(void* ctx, size_t size){
 
-	//Reproduces the same behavior as the Python allocator
-	if (size == 0){
-		size = 1;
+	
+	size_t alloced_size = size; 
+	if (alloced_size == 0){
+		alloced_size = 1;
 	}
 
 	if (gblMaltPythonAllocator->enabledFlag == true){
 		if (gblMaltPythonAllocator->recursiveGuard == false){
 			gblMaltPythonAllocator->recursiveGuard = true;
-			gblMaltPythonAllocator->maltPythonHandler->maltLogPythonAlloc(PYMEM_DOMAIN_OBJ, size);
+			gblMaltPythonAllocator->maltPythonHandler->maltLogPythonAlloc(PYMEM_DOMAIN_OBJ, alloced_size);
 			gblMaltPythonAllocator->recursiveGuard = false;
-		}else{
-			gblMaltPythonAllocator->recursiveFault++;
 		}
 	}
 
-	return gblMaltPythonAllocator->originalAllocatorObj->malloc(ctx, size);
+	return gblMaltPythonAllocator->originalAllocator->allocatorObj->malloc(ctx, size);
 }
 
 
 /**
  * Overlap for the Obj domain Free function
  */
-static void Malt_PyObject_Free(void* ctx, void* ptr){
+void Malt_PyObject_Free(void* ctx, void* ptr){
 
 	if (gblMaltPythonAllocator->enabledFlag == true){
 		if (gblMaltPythonAllocator->recursiveGuard == false){
 			gblMaltPythonAllocator->recursiveGuard = true;
 			gblMaltPythonAllocator->maltPythonHandler->maltLogPythonFree(PYMEM_DOMAIN_OBJ, ptr);
 			gblMaltPythonAllocator->recursiveGuard = false;	
-		}else{
-			gblMaltPythonAllocator->recursiveFault++;
 		}
 	}
 
-	return gblMaltPythonAllocator->originalAllocatorObj->free(ctx, ptr);
+	return gblMaltPythonAllocator->originalAllocator->allocatorObj->free(ctx, ptr);
 }
 
 
 /**
  * Overlap for the Mem domain Calloc function
  */
-static void* Malt_PyObject_Calloc(void* ctx, size_t nelem, size_t elsize){
+void* Malt_PyObject_Calloc(void* ctx, size_t nelem, size_t elsize){
 
-	if (nelem == 0 || elsize == 0) {
-        nelem = 1;
-        elsize = 1;
+	size_t alloced_nelem = nelem;
+	size_t alloced_elsize = elsize;
+	if (alloced_nelem == 0 || alloced_elsize == 0) {
+        alloced_nelem = 1;
+        alloced_elsize = 1;
     }
 
 	if (gblMaltPythonAllocator->enabledFlag == true){
 		if (gblMaltPythonAllocator->recursiveGuard == false){
 			gblMaltPythonAllocator->recursiveGuard = true;
-			gblMaltPythonAllocator->maltPythonHandler->maltLogPythonCalloc(PYMEM_DOMAIN_OBJ, nelem, elsize);
+			gblMaltPythonAllocator->maltPythonHandler->maltLogPythonCalloc(PYMEM_DOMAIN_OBJ, alloced_nelem, alloced_elsize);
 			gblMaltPythonAllocator->recursiveGuard = false;	
-		}else{
-			gblMaltPythonAllocator->recursiveFault++;
 		}
 	}
 
-	return gblMaltPythonAllocator->originalAllocatorObj->calloc(ctx, nelem, elsize);
+	return gblMaltPythonAllocator->originalAllocator->allocatorObj->calloc(ctx, nelem, elsize);
 }
 
 
 /**
  * Overlap for the Mem domain Realloc function
  */
-static void* Malt_PyObject_Realloc(void* ctx, void *ptr, size_t new_size){
+void* Malt_PyObject_Realloc(void* ctx, void *ptr, size_t new_size){
 
-	//Reproduces the same behavior as the Python allocator
-	if (new_size == 0){
-		new_size = 1;
+	size_t alloced_new_size = new_size;
+	if (alloced_new_size == 0){
+		alloced_new_size = 1;
 	}
+
 
 	if (gblMaltPythonAllocator->enabledFlag == true){
 		if (gblMaltPythonAllocator->recursiveGuard == false){
 			gblMaltPythonAllocator->recursiveGuard = true;
-			gblMaltPythonAllocator->maltPythonHandler->maltLogPythonRealloc(PYMEM_DOMAIN_OBJ, ptr, new_size);
+			gblMaltPythonAllocator->maltPythonHandler->maltLogPythonRealloc(PYMEM_DOMAIN_OBJ, ptr, alloced_new_size);
 			gblMaltPythonAllocator->recursiveGuard = false;
-		}else{
-			gblMaltPythonAllocator->recursiveFault++;
 		}
 	}
 
-	return gblMaltPythonAllocator->originalAllocatorObj->realloc(ctx, ptr, new_size);
+	return gblMaltPythonAllocator->originalAllocator->allocatorObj->realloc(ctx, ptr, new_size);
 }
+
+
+
+
+/** Initialises a Python Allocator */
+PythonAllocator_t* initialisePythonAllocator(){
+	PythonAllocator_t* pythonAllocator = new PythonAllocator_t();
+	pythonAllocator->allocatorRaw = new PythonAllocatorPerDomain();
+	pythonAllocator->allocatorMem = new PythonAllocatorPerDomain();
+	pythonAllocator->allocatorObj = new PythonAllocatorPerDomain();
+	return pythonAllocator;
+}
+
+/** Destroys a Python Allocator */
+void destroyPythonAllocator(PythonAllocator_t* pythonAllocator){
+	assert(pythonAllocator != nullptr);
+	delete pythonAllocator->allocatorObj;
+	delete pythonAllocator->allocatorMem;
+	delete pythonAllocator->allocatorRaw;
+	delete pythonAllocator;
+}
+
 
 /**
  * Constructor for the custom allocator, fetches the Python original allocator and initialises the custom malt Python allocator
@@ -284,50 +296,44 @@ static void* Malt_PyObject_Realloc(void* ctx, void *ptr, size_t new_size){
  */
 MaltPythonAllocator_t* initialiseMaltPythonAllocator(PythonHandler* pythonHandler){
 	assert(gblMaltPythonAllocator == nullptr);
-	gblMaltPythonAllocator = new MaltPythonAllocator();
+	MaltPythonAllocator_t* maltPythonAllocator = new MaltPythonAllocator_t();
 
-	gblMaltPythonAllocator->maltPythonHandler = pythonHandler;
+	maltPythonAllocator->maltPythonHandler = pythonHandler;
 
 	//Init the original Python allocator
-	gblMaltPythonAllocator->originalAllocatorRaw = new PythonAllocatorPerDomain();
-	gblMaltPythonAllocator->originalAllocatorMem = new PythonAllocatorPerDomain();
-	gblMaltPythonAllocator->originalAllocatorObj = new PythonAllocatorPerDomain();
-
+	maltPythonAllocator->originalAllocator = initialisePythonAllocator();
+	
 	//Populate it with the orginal allocator function pointers
-	PyMem_GetAllocator(PYMEM_DOMAIN_RAW, gblMaltPythonAllocator->originalAllocatorRaw);
-	PyMem_GetAllocator(PYMEM_DOMAIN_MEM, gblMaltPythonAllocator->originalAllocatorMem);
-	PyMem_GetAllocator(PYMEM_DOMAIN_OBJ, gblMaltPythonAllocator->originalAllocatorObj);
+	PyMem_GetAllocator(PYMEM_DOMAIN_RAW, maltPythonAllocator->originalAllocator->allocatorRaw);
+	PyMem_GetAllocator(PYMEM_DOMAIN_MEM, maltPythonAllocator->originalAllocator->allocatorMem);
+	PyMem_GetAllocator(PYMEM_DOMAIN_OBJ, maltPythonAllocator->originalAllocator->allocatorObj);
 
 	//Init our MALT custom Python allocator
-	gblMaltPythonAllocator->maltAllocatorRaw = new PythonAllocatorPerDomain();
-	gblMaltPythonAllocator->maltAllocatorMem = new PythonAllocatorPerDomain();
-	gblMaltPythonAllocator->maltAllocatorObj = new PythonAllocatorPerDomain();
+	maltPythonAllocator->customAllocator = initialisePythonAllocator();
 
 	//Populate it with our own functions for each domain
 	//Raw Domain
-	gblMaltPythonAllocator->maltAllocatorRaw->malloc = Malt_PyMem_RawMalloc;
-	gblMaltPythonAllocator->maltAllocatorRaw->free = Malt_PyMem_RawFree;
-	gblMaltPythonAllocator->maltAllocatorRaw->calloc = Malt_PyMem_RawCalloc;
-	gblMaltPythonAllocator->maltAllocatorRaw->realloc = Malt_PyMem_RawRealloc;
+	maltPythonAllocator->customAllocator->allocatorRaw->malloc = Malt_PyMem_RawMalloc;
+	maltPythonAllocator->customAllocator->allocatorRaw->free = Malt_PyMem_RawFree;
+	maltPythonAllocator->customAllocator->allocatorRaw->calloc = Malt_PyMem_RawCalloc;
+	maltPythonAllocator->customAllocator->allocatorRaw->realloc = Malt_PyMem_RawRealloc;
 
 	//Mem domain
-	gblMaltPythonAllocator->maltAllocatorMem->malloc = Malt_PyMem_Malloc;
-	gblMaltPythonAllocator->maltAllocatorMem->free = Malt_PyMem_Free;
-	gblMaltPythonAllocator->maltAllocatorMem->calloc = Malt_PyMem_Calloc;
-	gblMaltPythonAllocator->maltAllocatorMem->realloc = Malt_PyMem_Realloc;
+	maltPythonAllocator->customAllocator->allocatorMem->malloc = Malt_PyMem_Malloc;
+	maltPythonAllocator->customAllocator->allocatorMem->free = Malt_PyMem_Free;
+	maltPythonAllocator->customAllocator->allocatorMem->calloc = Malt_PyMem_Calloc;
+	maltPythonAllocator->customAllocator->allocatorMem->realloc = Malt_PyMem_Realloc;
 
 	//Obj domain
-	gblMaltPythonAllocator->maltAllocatorObj->malloc = Malt_PyObject_Malloc;
-	gblMaltPythonAllocator->maltAllocatorObj->free = Malt_PyObject_Free;
-	gblMaltPythonAllocator->maltAllocatorObj->calloc = Malt_PyObject_Calloc;
-	gblMaltPythonAllocator->maltAllocatorObj->realloc = Malt_PyObject_Realloc;
+	maltPythonAllocator->customAllocator->allocatorObj->malloc = Malt_PyObject_Malloc;
+	maltPythonAllocator->customAllocator->allocatorObj->free = Malt_PyObject_Free;
+	maltPythonAllocator->customAllocator->allocatorObj->calloc = Malt_PyObject_Calloc;
+	maltPythonAllocator->customAllocator->allocatorObj->realloc = Malt_PyObject_Realloc;
 
-	//Set the allocator into the Python Interpreter
-	PyMem_SetAllocator(PYMEM_DOMAIN_RAW, gblMaltPythonAllocator->maltAllocatorRaw);
-	PyMem_SetAllocator(PYMEM_DOMAIN_MEM, gblMaltPythonAllocator->maltAllocatorMem);
-	PyMem_SetAllocator(PYMEM_DOMAIN_OBJ, gblMaltPythonAllocator->maltAllocatorObj);
+	maltPythonAllocator->recursiveGuard = false;
+	maltPythonAllocator->enabledFlag = false;
 
-	return gblMaltPythonAllocator;
+	return maltPythonAllocator;
 }
 
 
@@ -335,35 +341,29 @@ MaltPythonAllocator_t* initialiseMaltPythonAllocator(PythonHandler* pythonHandle
  * Destroys MALT custom Python allocator
  * It needs to be disabled beforehand
  */
-void destroyMaltPythonAllocator(MaltPythonAllocator_t* maltAllocator){
-	assert(maltAllocator->enabledFlag == false);
-	assert(maltAllocator->recursiveGuard == false);
+void destroyMaltPythonAllocator(MaltPythonAllocator_t* maltPythonAllocator){
+	assert(maltPythonAllocator->enabledFlag == false);
+	assert(maltPythonAllocator->recursiveGuard == false);
 
-	//First the malt custom allocator
-	delete maltAllocator->maltAllocatorRaw;
-	delete maltAllocator->maltAllocatorMem;
-	delete maltAllocator->maltAllocatorObj;
-
-	//Then the original Python allocator
-	delete maltAllocator->originalAllocatorRaw;
-	delete maltAllocator->originalAllocatorMem;
-	delete maltAllocator->originalAllocatorObj;
-
-	maltAllocator = nullptr;
+	destroyPythonAllocator(maltPythonAllocator->customAllocator);
+	destroyPythonAllocator(maltPythonAllocator->originalAllocator);
+	maltPythonAllocator->maltPythonHandler = nullptr;
+	
+	delete maltPythonAllocator;
 }
 
 
 /**
  * Enables MALT custom Python Allocator
  */
-void enableMaltPythonAllocator(MaltPythonAllocator_t* maltAllocator){
+void enableMaltPythonAllocator(MaltPythonAllocator_t* maltPythonAllocator){
 	assert(gblMaltPythonAllocator->enabledFlag == false);
-	maltAllocator->enabledFlag = true;
+	maltPythonAllocator->enabledFlag = true;
 
 	//Set MALT custom Python allocator as the Python allocator
-	PyMem_SetAllocator(PYMEM_DOMAIN_RAW, maltAllocator->maltAllocatorRaw);
-	PyMem_SetAllocator(PYMEM_DOMAIN_MEM, maltAllocator->maltAllocatorMem);
-	PyMem_SetAllocator(PYMEM_DOMAIN_OBJ, maltAllocator->maltAllocatorObj);
+	PyMem_SetAllocator(PYMEM_DOMAIN_RAW, maltPythonAllocator->customAllocator->allocatorRaw);
+	PyMem_SetAllocator(PYMEM_DOMAIN_MEM, maltPythonAllocator->customAllocator->allocatorMem);
+	PyMem_SetAllocator(PYMEM_DOMAIN_OBJ, maltPythonAllocator->customAllocator->allocatorObj);
 }
 
 
@@ -375,15 +375,10 @@ void disableMaltPythonAllocator(MaltPythonAllocator_t* maltAllocator){
 	maltAllocator->enabledFlag = false;
 
 	//Set the Original Python allocator as the Python allocator i.e: removes MALT Python allocator
-	PyMem_SetAllocator(PYMEM_DOMAIN_RAW, maltAllocator->originalAllocatorRaw);
-	PyMem_SetAllocator(PYMEM_DOMAIN_MEM, maltAllocator->originalAllocatorMem);
-	PyMem_SetAllocator(PYMEM_DOMAIN_OBJ, maltAllocator->originalAllocatorObj);
+	PyMem_SetAllocator(PYMEM_DOMAIN_RAW, maltAllocator->originalAllocator->allocatorRaw);
+	PyMem_SetAllocator(PYMEM_DOMAIN_MEM, maltAllocator->originalAllocator->allocatorMem);
+	PyMem_SetAllocator(PYMEM_DOMAIN_OBJ, maltAllocator->originalAllocator->allocatorObj);
 }
 
-/**
- * FIXME: Debbuging purposes, will be removed
- */
-void printRecursiveFault(MaltPythonAllocator_t* maltAllocator){
-	std::cout << maltAllocator->recursiveFault << " recursive faults" << std::endl;
-}
+
 }

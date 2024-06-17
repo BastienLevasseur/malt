@@ -15,6 +15,8 @@ find_package(Qt5Widgets QUIET)
 find_package(Qt5WebEngineWidgets QUIET)
 find_package(Qt5WebKitWidgets QUIET)
 find_package(Qt5Network QUIET)
+#maltPythonIntegration Added Python3 requirement TODO: Make it optional 
+find_package(Python3 REQUIRED COMPONENTS Interpreter Development QUIET)
 
 ######################################################
 if (Qt5WebEngineWidgets_FOUND OR Qt5WebKitWidgets_FOUND)

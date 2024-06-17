@@ -9,25 +9,32 @@ namespace MALT {
 //Rename the Python Allocator type into a better name
 typedef PyMemAllocatorEx PythonAllocatorPerDomain;
 
+//Wrapping the three domains of the Python allocator into one struct
+typedef struct PythonAllocator{
+    PythonAllocatorPerDomain* allocatorRaw;
+    PythonAllocatorPerDomain* allocatorMem;
+    PythonAllocatorPerDomain* allocatorObj;
+} PythonAllocator_t;
+
+
 /** The MALT custom Python allocator that wraps the original Python allocator */
 typedef struct MaltPythonAllocator{
-    /* The original Python allocator, separated into the three domains */
-    PythonAllocatorPerDomain* originalAllocatorRaw;
-    PythonAllocatorPerDomain* originalAllocatorMem;
-    PythonAllocatorPerDomain* originalAllocatorObj;
-
-    /* The MALT custom Python allocator, also separated into three domains */
-    PythonAllocatorPerDomain* maltAllocatorRaw;
-    PythonAllocatorPerDomain* maltAllocatorMem;
-    PythonAllocatorPerDomain* maltAllocatorObj;
-
-    bool recursiveGuard;
-    bool enabledFlag;
+    /* The original Python allocator */
+    PythonAllocator_t* originalAllocator;
+    
+    /* The MALT custom Python allocator */
+    PythonAllocator_t* customAllocator;
 
     PythonHandler* maltPythonHandler;
 
-    size_t recursiveFault;
+    bool recursiveGuard;
+    bool enabledFlag;
 } MaltPythonAllocator_t;
+
+
+
+PythonAllocator_t* initialisePythonAllocator();
+void destroyPythonAllocator(PythonAllocator_t* pythonAllocator);
 
 MaltPythonAllocator_t* initialiseMaltPythonAllocator(PythonHandler* pythonHandler);
 void destroyMaltPythonAllocator(MaltPythonAllocator_t* maltAllocator);
@@ -35,7 +42,6 @@ void destroyMaltPythonAllocator(MaltPythonAllocator_t* maltAllocator);
 void enableMaltPythonAllocator(MaltPythonAllocator_t* maltAllocator);
 void disableMaltPythonAllocator(MaltPythonAllocator_t* maltAllocator);
 
-void printRecursiveFault(MaltPythonAllocator_t* maltAllocator);
 }
 
 #endif //MaltPythonAllocator_hpp

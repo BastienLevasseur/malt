@@ -20,7 +20,6 @@ else (LIBUNWIND_FOUND)
 endif (LIBUNWIND_FOUND)
 
 ######################################################
-#maltPythonIntegration TODO: Do we have to add something here?
 #Code options
 set(ENABLE_CODE_TIMING   "no"       CACHE BOOL   "Enable some tricks to quickly check timings of hostspots of MALT internal code.")
 
@@ -53,7 +52,10 @@ endif (LIBELF_FOUND)
 if (LIBUNWIND_FOUND)
 	list(APPEND LIB_MALT_DEPS ${LIBUNWIND_LIBRARIES})
 endif (LIBUNWIND_FOUND)
-
+#maltPythonIntegration Added Python3 library into the dependencies
+if ((Python3_FOUND) AND (Python3_Development_FOUND))
+    list(APPEND LIB_MALT_DEPS ${Python3_LIBRARIES})
+endif((Python3_FOUND) AND (Python3_Development_FOUND))
 ######################################################
 #gen config.h
 configure_file(${CMAKE_CURRENT_SOURCE_DIR}/config.h.in ${CMAKE_CURRENT_BINARY_DIR}/config.h)
