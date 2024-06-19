@@ -2,7 +2,7 @@
 #define PythonHandler_hpp
 
 #include "DummyStatistics.hpp"
-#include "PythonAllocatorDomain.hpp"
+#include "PythonAllocatorDomainType.hpp"
 
 namespace MALT {
 
@@ -16,13 +16,13 @@ namespace MALT {
             PythonHandler(DummyStatistics* dummsyStats);
             ~PythonHandler();
 
-            void maltLogPythonAlloc(const PythonAllocatorDomain& pyMallocDomain, size_t size);
+            void maltLogPythonAlloc(const PythonAllocatorDomainType& pyMallocDomain, size_t size);
 
-            void maltLogPythonFree(const PythonAllocatorDomain& pyMallocDomain, void* freePtr);
+            void maltLogPythonFree(const PythonAllocatorDomainType& pyMallocDomain, void* freePtr);
 
-            void maltLogPythonCalloc(const PythonAllocatorDomain& pyMallocDomain, size_t nbElements, size_t elementSize);
+            void maltLogPythonCalloc(const PythonAllocatorDomainType& pyMallocDomain, size_t nbElements, size_t elementSize);
 
-            void maltLogPythonRealloc(const PythonAllocatorDomain& pyMallocDomain, void* reallocPtr, size_t newSize);
+            void maltLogPythonRealloc(const PythonAllocatorDomainType& pyMallocDomain, void* reallocPtr, size_t newSize);
 
         private:
 

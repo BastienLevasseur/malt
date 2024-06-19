@@ -10,7 +10,7 @@ DummyStatistics::DummyStatistics(){
 }
 
 
-DummyStatistics::DomainStatistics& DummyStatistics::getDomainStatistics(const PythonAllocatorDomain& domain){
+DummyStatistics::DomainStatistics& DummyStatistics::getDomainStatistics(const PythonAllocatorDomainType& domain){
     switch(domain){
         case PYMEM_DOMAIN_RAW:
             return this->rawDomainType;
@@ -25,69 +25,69 @@ DummyStatistics::DomainStatistics& DummyStatistics::getDomainStatistics(const Py
 }
 
 
-void DummyStatistics::mallocCountUp(const PythonAllocatorDomain& mallocDomain){
+void DummyStatistics::mallocCountUp(const PythonAllocatorDomainType& mallocDomain){
     this->getDomainStatistics(mallocDomain).nbMalloc++;
 }
 
-void DummyStatistics::freeCountUp(const PythonAllocatorDomain& freeDomain){
+void DummyStatistics::freeCountUp(const PythonAllocatorDomainType& freeDomain){
     this->getDomainStatistics(freeDomain).nbFree++;
 }
 
-void DummyStatistics::callocCountUp(const PythonAllocatorDomain& callocDomain){
+void DummyStatistics::callocCountUp(const PythonAllocatorDomainType& callocDomain){
     this->getDomainStatistics(callocDomain).nbCalloc++;
 }
 
-void DummyStatistics::reallocCountUp(const PythonAllocatorDomain& reallocDomain){
+void DummyStatistics::reallocCountUp(const PythonAllocatorDomainType& reallocDomain){
     this->getDomainStatistics(reallocDomain).nbRealloc++;
 }
 
-void DummyStatistics::locationCountUp(const PythonAllocatorDomain& locationDomain){
+void DummyStatistics::locationCountUp(const PythonAllocatorDomainType& locationDomain){
     this->getDomainStatistics(locationDomain).nbLocation++;
 }
 
-void DummyStatistics::callStackCountUp(const PythonAllocatorDomain &callStackDomain){
+void DummyStatistics::callStackCountUp(const PythonAllocatorDomainType &callStackDomain){
     this->getDomainStatistics(callStackDomain).nbCallStack++;
 }
 
-void DummyStatistics::emptyCallStackCountUp(const PythonAllocatorDomain &emptyCallStackDomain){
+void DummyStatistics::emptyCallStackCountUp(const PythonAllocatorDomainType &emptyCallStackDomain){
     this->getDomainStatistics(emptyCallStackDomain).nbEmptyCallStack++;
 }
 
-void DummyStatistics::ptrIncoherenceCountUp(const PythonAllocatorDomain &ptrIncoherenceDomain){
+void DummyStatistics::ptrIncoherenceCountUp(const PythonAllocatorDomainType &ptrIncoherenceDomain){
     this->getDomainStatistics(ptrIncoherenceDomain).nbPtrIncoherence++;
 }
 
-void DummyStatistics::mallocSumUp(const PythonAllocatorDomain& mallocDomain, size_t mallocSize){
+void DummyStatistics::mallocSumUp(const PythonAllocatorDomainType& mallocDomain, size_t mallocSize){
     this->getDomainStatistics(mallocDomain).sumAlloc += mallocSize;
     this->getDomainStatistics(mallocDomain).allocationMap.insertAlloc(mallocSize);
 }
 
-void DummyStatistics::callocSumUp(const PythonAllocatorDomain& callocDomain, size_t callocSize){
+void DummyStatistics::callocSumUp(const PythonAllocatorDomainType& callocDomain, size_t callocSize){
     this->getDomainStatistics(callocDomain).sumCalloc += callocSize;
     this->getDomainStatistics(callocDomain).allocationMap.insertAlloc(callocSize);
 }
 
-size_t DummyStatistics::getMallocCount(const PythonAllocatorDomain& mallocDomain){
+size_t DummyStatistics::getMallocCount(const PythonAllocatorDomainType& mallocDomain){
     return this->getDomainStatistics(mallocDomain).nbMalloc;
 }
 
-size_t DummyStatistics::getFreeCount(const PythonAllocatorDomain& freeDomain){
+size_t DummyStatistics::getFreeCount(const PythonAllocatorDomainType& freeDomain){
     return this->getDomainStatistics(freeDomain).nbFree;
 }
 
-size_t DummyStatistics::getCallocCount(const PythonAllocatorDomain& callocDomain){
+size_t DummyStatistics::getCallocCount(const PythonAllocatorDomainType& callocDomain){
     return this->getDomainStatistics(callocDomain).nbCalloc;
 }
 
-size_t DummyStatistics::getReallocCount(const PythonAllocatorDomain& reallocDomain){
+size_t DummyStatistics::getReallocCount(const PythonAllocatorDomainType& reallocDomain){
     return this->getDomainStatistics(reallocDomain).nbRealloc;
 }
 
-size_t DummyStatistics::getMallocSum(const PythonAllocatorDomain& mallocDomain){
+size_t DummyStatistics::getMallocSum(const PythonAllocatorDomainType& mallocDomain){
     return this->getDomainStatistics(mallocDomain).sumAlloc;
 }
 
-size_t DummyStatistics::getCallocSum(const PythonAllocatorDomain& callocDomain){
+size_t DummyStatistics::getCallocSum(const PythonAllocatorDomainType& callocDomain){
     return this->getDomainStatistics(callocDomain).sumCalloc;
 }
 

@@ -5,7 +5,7 @@
 #include <sstream>
 #include <vector>
 #include "DummyAllocationMap.hpp"
-#include "PythonAllocatorDomain.hpp"
+#include "PythonAllocatorDomainType.hpp"
 
 namespace MALT{
 
@@ -41,33 +41,33 @@ class DummyStatistics {
         DomainStatistics memDomainType;
         DomainStatistics objDomainType;
 
-        DomainStatistics& getDomainStatistics(const PythonAllocatorDomain& domain);
+        DomainStatistics& getDomainStatistics(const PythonAllocatorDomainType& domain);
 
     public: 
 
         DummyStatistics();
 
-        void mallocCountUp(const PythonAllocatorDomain& mallocDomain);
-        void freeCountUp(const PythonAllocatorDomain& freeDomain);
-        void callocCountUp(const PythonAllocatorDomain& callocDomain);
-        void reallocCountUp(const PythonAllocatorDomain& reallocDomain);
+        void mallocCountUp(const PythonAllocatorDomainType& mallocDomain);
+        void freeCountUp(const PythonAllocatorDomainType& freeDomain);
+        void callocCountUp(const PythonAllocatorDomainType& callocDomain);
+        void reallocCountUp(const PythonAllocatorDomainType& reallocDomain);
 
-        void locationCountUp(const PythonAllocatorDomain& locationDomain);
-        void callStackCountUp(const PythonAllocatorDomain& callStackDomain);
+        void locationCountUp(const PythonAllocatorDomainType& locationDomain);
+        void callStackCountUp(const PythonAllocatorDomainType& callStackDomain);
 
-        void emptyCallStackCountUp(const PythonAllocatorDomain& emptyCallStackDomain);
-        void ptrIncoherenceCountUp(const PythonAllocatorDomain& ptrIncoherenceDomain);
+        void emptyCallStackCountUp(const PythonAllocatorDomainType& emptyCallStackDomain);
+        void ptrIncoherenceCountUp(const PythonAllocatorDomainType& ptrIncoherenceDomain);
         
-        void mallocSumUp(const PythonAllocatorDomain& mallocDomain, size_t mallocSize);
-        void callocSumUp(const PythonAllocatorDomain& callocDomain, size_t callocSize);
+        void mallocSumUp(const PythonAllocatorDomainType& mallocDomain, size_t mallocSize);
+        void callocSumUp(const PythonAllocatorDomainType& callocDomain, size_t callocSize);
 
-        size_t getMallocCount(const PythonAllocatorDomain& mallocDomain);
-        size_t getFreeCount(const PythonAllocatorDomain& freeDomain);
-        size_t getCallocCount(const PythonAllocatorDomain& callocDomain);
-        size_t getReallocCount(const PythonAllocatorDomain& reallocDomain);
+        size_t getMallocCount(const PythonAllocatorDomainType& mallocDomain);
+        size_t getFreeCount(const PythonAllocatorDomainType& freeDomain);
+        size_t getCallocCount(const PythonAllocatorDomainType& callocDomain);
+        size_t getReallocCount(const PythonAllocatorDomainType& reallocDomain);
 
-        size_t getMallocSum(const PythonAllocatorDomain& mallocDomain);
-        size_t getCallocSum(const PythonAllocatorDomain& callocDomain);
+        size_t getMallocSum(const PythonAllocatorDomainType& mallocDomain);
+        size_t getCallocSum(const PythonAllocatorDomainType& callocDomain);
 
         friend std::ostream& operator << (std::ostream &out, const DummyStatistics& globalStats);
         friend std::ostream& operator << (std::ostream &out, const DomainStatistics& domainStats);

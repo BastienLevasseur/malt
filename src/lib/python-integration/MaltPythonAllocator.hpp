@@ -2,49 +2,75 @@
 #define MaltPythonAllocator_hpp
 
 #include "PythonHandler.hpp"
+#include "PythonDomainAllocatorWrapper.hpp"
+
 #include "Python.h"
 
 namespace MALT {
 
-//Rename the Python Allocator type into a better name
-typedef PyMemAllocatorEx PythonAllocatorPerDomain;
-
-//Wrapping the three domains of the Python allocator into one struct
-typedef struct PythonAllocator{
-    PythonAllocatorPerDomain* allocatorRaw;
-    PythonAllocatorPerDomain* allocatorMem;
-    PythonAllocatorPerDomain* allocatorObj;
-} PythonAllocator_t;
+/** Wrapper for the three domains of the orignal Python allocator */
+typedef struct PythonAllocatorWrapper{
+    PythonAllocatorDomain* allocatorRaw;
+    PythonAllocatorDomain* allocatorMem;
+    PythonAllocatorDomain* allocatorObj;
+} PythonAllocatorWrapper_t;
 
 
-/** The MALT custom Python allocator that wraps the original Python allocator */
-typedef struct MaltPythonAllocator{
-    /* The original Python allocator */
-    PythonAllocator_t* originalAllocator;
+/** Wrapper for the three domains of the MALT Python allocator */
+typedef struct MaltPythonAllocatorWrapper{
+    PythonDomainAllocatorWrapper* allocatorRaw;
+    PythonDomainAllocatorWrapper* allocatorMem;
+    PythonDomainAllocatorWrapper* allocatorObj;
+} MaltPythonAllocatorWrapper_t;
+
+
+/** 
+ * The entry point into the MALT Python allocator.
+ * Makes the bridge between the orignal Python allocator and the MALT Python allocator.
+ */
+class MaltPythonAllocator {
+
+    //FIXME: "Wrapper" has two meanings... :
+    // MaltPythonAllocatorWrapper_t & PythonAllocatorWrapper_t are wrappers in the sense they wrap the three domains
+    // PythonDomainAllocatorWrapper is a wrapper in the sense it wraps the Python allocator
+    //FIXME: Rename one of those, probably the PythonDomainAllocatorWrapper
+
+    public:
+        MaltPythonAllocator(PythonHandler* pythonHandler);
+        ~MaltPythonAllocator();
+
+        void enable();
+        void disable();
+
+        bool isEnabled();
+
+    private:
+        /* The original Python allocator */
+        PythonAllocatorWrapper_t* originalAllocator;
+
+        /* The MALT custom Python allocator */
+        PythonAllocatorWrapper_t* customAllocator;
     
-    /* The MALT custom Python allocator */
-    PythonAllocator_t* customAllocator;
+        PythonHandler* pythonHandler;
 
-    PythonHandler* maltPythonHandler;
+        bool enabledFlag;
 
-    bool recursiveGuard;
-    bool enabledFlag;
-} MaltPythonAllocator_t;
+        PythonGuard* pythonGuard;
 
-void getPythonAllocatorFunctions(PythonAllocator_t* pythonAllocator);
+        MaltPythonAllocatorWrapper_t* maltAllocatorWrapper;
 
-void setPythonAllocatorFunctions(PythonAllocator_t* pythonAllocator);
+    private:
+        MaltPythonAllocatorWrapper_t* initialiseMaltPythonAllocatorWrapper();
+        void destroyMaltPythonAllocatorWrapper(MaltPythonAllocatorWrapper_t* maltPythonAllocator);
 
-PythonAllocator_t* initialisePythonAllocator();
-void destroyPythonAllocator(PythonAllocator_t* pythonAllocator);
+        PythonAllocatorWrapper_t* initialisePythonAllocator();
+        void destroyPythonAllocator(PythonAllocatorWrapper_t* pythonAllocator);
 
-void initialiseMaltPythonAllocator(PythonHandler* pythonHandler);
-void destroyMaltPythonAllocator(MaltPythonAllocator_t* maltPythonAllocator);
+        void getPythonAllocatorFunctions(PythonAllocatorWrapper_t* pythonAllocator);
+        void setPythonAllocator(PythonAllocatorWrapper_t* pythonAllocator);
+};
 
-void enableMaltPythonAllocator(MaltPythonAllocator_t* maltPythonAllocator);
-void disableMaltPythonAllocator(MaltPythonAllocator_t* maltPythonAllocator);
 
-MaltPythonAllocator_t* getGlobalMaltPythonAllocator();
 }
 
 #endif //MaltPythonAllocator_hpp

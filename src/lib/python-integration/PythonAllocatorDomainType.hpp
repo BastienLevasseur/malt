@@ -7,7 +7,7 @@
 
 namespace MALT{
 
-    typedef PyMemAllocatorDomain PythonAllocatorDomain;
+    typedef PyMemAllocatorDomain PythonAllocatorDomainType;
 
     static const char* cstPyMallocDomains[PYMALLOC_DOMAIN_COUNT] = {
         "raw",
