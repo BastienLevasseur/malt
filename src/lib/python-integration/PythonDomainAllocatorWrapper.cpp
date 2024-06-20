@@ -24,7 +24,7 @@ namespace MALT {
 	    }
         
         if(this->guard->enterOnce()){
-            this->pythonHandler->maltLogPythonAlloc(this->domain, alloced_size);
+            this->pythonHandler->onMalloc(this->domain, alloced_size);
             this->guard->exit();
         }
 
@@ -35,7 +35,7 @@ namespace MALT {
     void PythonDomainAllocatorWrapper::onFree(void* context, void* ptr){
 
         if(this->guard->enterOnce()){
-            this->pythonHandler->maltLogPythonFree(this->domain, ptr);
+            this->pythonHandler->onFree(this->domain, ptr);
             this->guard->exit();
         }
         return this->originalAllocator->free(context, ptr);
@@ -53,7 +53,7 @@ namespace MALT {
         }
 
         if(this->guard->enterOnce()){
-            this->pythonHandler->maltLogPythonCalloc(this->domain, nelem_alloced, elsize_alloced);
+            this->pythonHandler->onCalloc(this->domain, nelem_alloced, elsize_alloced);
             this->guard->exit();
         }
 
@@ -69,7 +69,7 @@ namespace MALT {
         }
         
         if(this->guard->enterOnce()){
-            this->pythonHandler->maltLogPythonRealloc(this->domain, ptr, size_alloced);
+            this->pythonHandler->onRealloc(this->domain, ptr, size_alloced);
             this->guard->exit();
         }
 

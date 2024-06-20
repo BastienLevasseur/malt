@@ -7,9 +7,8 @@ set(MALT_LIB_SRC
     DummyLocation.cpp
     DummyStatistics.cpp
 
-    MaltPythonAllocator.cpp
-
     PythonAllocatorDomainType.hpp    
+    PythonAllocatorHooking.cpp
     PythonBacktraceStack.cpp
     PythonDomainAllocatorWrapper.cpp
     PythonGuard.cpp
@@ -23,6 +22,7 @@ SET_TARGET_PROPERTIES(malt-python-integration PROPERTIES COMPILE_FLAGS -fPIC)
 target_link_libraries(malt-python-integration PUBLIC ${Python3_LIBRARIES})
 
 #add_executable(malt-python SimpleExecutable.cpp)
+#target_link_libraries(malt-python PUBLIC malt-base)
 
 #if (ENABLE_TESTS)
 #	add_subdirectory(tests)

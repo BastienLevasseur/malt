@@ -1,4 +1,4 @@
-#include "MaltPythonAllocator.hpp"
+#include "PythonAllocatorHooking.hpp"
 #include "PythonGuard.hpp"
 
 #include <common/Debug.hpp>
@@ -78,7 +78,7 @@ void* Malt_PyObject_Realloc(void* ctx, void *ptr, size_t new_size){
  * Creates a the MALT Python allocator, ready to be enabled into the Python Interpreter.
  * @param pythonHandler : A pointer to a Python Handler.
  */
-MaltPythonAllocator::MaltPythonAllocator(PythonHandler* pythonHandler){
+PythonAllocatorHooking::PythonAllocatorHooking(PythonHandler* pythonHandler){
 	this->pythonHandler = pythonHandler;
 
 	this->pythonGuard = new PythonGuard();
@@ -111,7 +111,7 @@ MaltPythonAllocator::MaltPythonAllocator(PythonHandler* pythonHandler){
 /**
  * Deletes the MALT Python allocator.
  */
-MaltPythonAllocator::~MaltPythonAllocator(){
+PythonAllocatorHooking::~PythonAllocatorHooking(){
 	if (this->enabledFlag != false){
 		MALT_WARNING("MALT Python allocator was not disabled before deletion. Python will likely crash !");
 	}
@@ -130,7 +130,7 @@ MaltPythonAllocator::~MaltPythonAllocator(){
 /**
  * Enables the MALT Python allocator into the Python Interpreter.
  */
-void MaltPythonAllocator::enable(){
+void PythonAllocatorHooking::enable(){
 	assert(this->enabledFlag == false);
 	this->enabledFlag = true;
 
@@ -141,7 +141,7 @@ void MaltPythonAllocator::enable(){
  * Disables the MALT Python allocator from the Python Interpreter.
  * Replaced by the original Python allocator
  */
-void MaltPythonAllocator::disable(){
+void PythonAllocatorHooking::disable(){
 	assert(this->enabledFlag == true);
 	this->enabledFlag = false;
 
@@ -151,19 +151,19 @@ void MaltPythonAllocator::disable(){
 /**
  * Verify if the MALT Python allocator is currently enabled.
  */
-bool MaltPythonAllocator::isEnabled(){
+bool PythonAllocatorHooking::isEnabled(){
     return this->enabledFlag;
 }
 
 /**
  * Initializer for a MALT Python allocator wrapper, wraps three MALT Python allocators into one structure. One for each domain.
  */
-MaltPythonAllocatorWrapper_t* MaltPythonAllocator::initialiseMaltPythonAllocatorWrapper(){
+MaltPythonAllocatorWrapper_t* PythonAllocatorHooking::initialiseMaltPythonAllocatorWrapper(){
 	MaltPythonAllocatorWrapper_t* allocator = new MaltPythonAllocatorWrapper_t();
 	
 	allocator->allocatorRaw = new PythonDomainAllocatorWrapper(this->pythonHandler, PYMEM_DOMAIN_RAW, this->pythonGuard, this->originalAllocator->allocatorRaw);
-	allocator->allocatorObj = new PythonDomainAllocatorWrapper(this->pythonHandler, PYMEM_DOMAIN_MEM, this->pythonGuard, this->originalAllocator->allocatorMem);
-	allocator->allocatorMem = new PythonDomainAllocatorWrapper(this->pythonHandler, PYMEM_DOMAIN_OBJ, this->pythonGuard, this->originalAllocator->allocatorObj);
+	allocator->allocatorMem = new PythonDomainAllocatorWrapper(this->pythonHandler, PYMEM_DOMAIN_MEM, this->pythonGuard, this->originalAllocator->allocatorMem);
+	allocator->allocatorObj = new PythonDomainAllocatorWrapper(this->pythonHandler, PYMEM_DOMAIN_OBJ, this->pythonGuard, this->originalAllocator->allocatorObj);
 
 	return allocator;
 }
@@ -172,7 +172,7 @@ MaltPythonAllocatorWrapper_t* MaltPythonAllocator::initialiseMaltPythonAllocator
  * Destroys a MALT Python allocator wrapper.
  * @param maltPythonAllocatorWrapper : The wrapper to be destroyed.
  */
-void MaltPythonAllocator::destroyMaltPythonAllocatorWrapper(MaltPythonAllocatorWrapper_t* maltPythonAllocatorWrapper){
+void PythonAllocatorHooking::destroyMaltPythonAllocatorWrapper(MaltPythonAllocatorWrapper_t* maltPythonAllocatorWrapper){
 	delete maltPythonAllocatorWrapper->allocatorObj;
 	delete maltPythonAllocatorWrapper->allocatorMem;
 	delete maltPythonAllocatorWrapper->allocatorRaw;
@@ -183,7 +183,7 @@ void MaltPythonAllocator::destroyMaltPythonAllocatorWrapper(MaltPythonAllocatorW
 /**
  * Initialises a Python Allocator wrapper, wraps three Python allocators into one structure. One for each domain.
  */
-PythonAllocatorWrapper_t* MaltPythonAllocator::initialisePythonAllocator(){
+PythonAllocatorWrapper_t* PythonAllocatorHooking::initialisePythonAllocator(){
 	PythonAllocatorWrapper_t* pythonAllocator = new PythonAllocatorWrapper_t();
 	pythonAllocator->allocatorRaw = new PythonAllocatorDomain();
 	pythonAllocator->allocatorMem = new PythonAllocatorDomain();
@@ -195,7 +195,7 @@ PythonAllocatorWrapper_t* MaltPythonAllocator::initialisePythonAllocator(){
  * Destroys a Python Allocator.
  * @param pythonAllocatorWrapper : The wrapper to be destroyed.
  */
-void MaltPythonAllocator::destroyPythonAllocator(PythonAllocatorWrapper_t* pythonAllocatorWrapper){
+void PythonAllocatorHooking::destroyPythonAllocator(PythonAllocatorWrapper_t* pythonAllocatorWrapper){
 	delete pythonAllocatorWrapper->allocatorObj;
 	delete pythonAllocatorWrapper->allocatorMem;
 	delete pythonAllocatorWrapper->allocatorRaw;
@@ -207,7 +207,7 @@ void MaltPythonAllocator::destroyPythonAllocator(PythonAllocatorWrapper_t* pytho
  * Get the three Python allocators corresponding to the three domains.
  * @param pythonAllocatorWrapper : The wrapper to be filled.
  *  */
-void MaltPythonAllocator::getPythonAllocatorFunctions(PythonAllocatorWrapper_t* pythonAllocatorWrapper){
+void PythonAllocatorHooking::getPythonAllocatorFunctions(PythonAllocatorWrapper_t* pythonAllocatorWrapper){
 	PyMem_GetAllocator(PYMEM_DOMAIN_RAW, pythonAllocatorWrapper->allocatorRaw);
 	PyMem_GetAllocator(PYMEM_DOMAIN_MEM, pythonAllocatorWrapper->allocatorMem);
 	PyMem_GetAllocator(PYMEM_DOMAIN_OBJ, pythonAllocatorWrapper->allocatorObj);
@@ -217,30 +217,18 @@ void MaltPythonAllocator::getPythonAllocatorFunctions(PythonAllocatorWrapper_t* 
  *  Set the three Python allocators corresponding to the three domains.
  * @param pythonAllocatorWrapper : The wrapper to be set.
  *  */
-void MaltPythonAllocator::setPythonAllocator(PythonAllocatorWrapper_t* pythonAllocatorWrapper){
+void PythonAllocatorHooking::setPythonAllocator(PythonAllocatorWrapper_t* pythonAllocatorWrapper){
 	assert(pythonAllocatorWrapper->allocatorRaw != nullptr);
 	assert(pythonAllocatorWrapper->allocatorMem != nullptr);
 	assert(pythonAllocatorWrapper->allocatorObj != nullptr);
 
-	PyMem_SetAllocator(PYMEM_DOMAIN_RAW, pythonAllocatorWrapper->allocatorRaw);
-	PyMem_SetAllocator(PYMEM_DOMAIN_MEM, pythonAllocatorWrapper->allocatorMem);
-	PyMem_SetAllocator(PYMEM_DOMAIN_OBJ, pythonAllocatorWrapper->allocatorObj);
-
-	if (pythonAllocatorWrapper->allocatorRaw->ctx != nullptr){
-		MALT_WARNING_ARG("Context in the MALT Python Allocator Raw is being overriden with : %1, was : %2").arg(this->maltAllocatorWrapper->allocatorRaw).arg(pythonAllocatorWrapper->allocatorRaw->ctx).end();
-	}
-
-	if (pythonAllocatorWrapper->allocatorMem->ctx != nullptr){
-		MALT_WARNING_ARG("Context in the MALT Python Allocator Raw is being overriden with : %1, was : %2").arg(this->maltAllocatorWrapper->allocatorMem).arg(pythonAllocatorWrapper->allocatorMem->ctx).end();
-	}
-
-	if (pythonAllocatorWrapper->allocatorObj->ctx != nullptr){
-		MALT_WARNING_ARG("Context in the MALT Python Allocator Raw is being overriden with : %1, was : %2").arg(this->maltAllocatorWrapper->allocatorObj).arg(pythonAllocatorWrapper->allocatorObj->ctx).end();
-	}
-
 	pythonAllocatorWrapper->allocatorRaw->ctx = this->maltAllocatorWrapper->allocatorRaw;
 	pythonAllocatorWrapper->allocatorMem->ctx = this->maltAllocatorWrapper->allocatorMem;
 	pythonAllocatorWrapper->allocatorObj->ctx = this->maltAllocatorWrapper->allocatorObj;
+
+	PyMem_SetAllocator(PYMEM_DOMAIN_RAW, pythonAllocatorWrapper->allocatorRaw);
+	PyMem_SetAllocator(PYMEM_DOMAIN_MEM, pythonAllocatorWrapper->allocatorMem);
+	PyMem_SetAllocator(PYMEM_DOMAIN_OBJ, pythonAllocatorWrapper->allocatorObj);	
 }
 
 }

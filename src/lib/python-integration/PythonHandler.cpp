@@ -13,14 +13,14 @@ PythonHandler::PythonHandler(DummyStatistics* dummyStats){
 
 
 PythonHandler::~PythonHandler(){
-	//delete this->dummyStats;
+	;
 }
 
 /**
  * Handles a Python malloc, fetch the backtrace stack and print it, updates statistics
  * FIXME: Behavior will change at some point to use MALT internals 
  */
-void PythonHandler::maltLogPythonAlloc(const PythonAllocatorDomainType& pyMallocDomain, size_t size){
+void PythonHandler::onMalloc(const PythonAllocatorDomainType& pyMallocDomain, size_t size){
 	assert(size != 0);
 	
 	this->dummyStats->mallocCountUp(pyMallocDomain);
@@ -38,7 +38,7 @@ void PythonHandler::maltLogPythonAlloc(const PythonAllocatorDomainType& pyMalloc
  * Handles a Python free, fetch the backtrace stack and print it, updates statistics
  * FIXME: Behavior will change at some point to use MALT internals 
  */
-void PythonHandler::maltLogPythonFree(const PythonAllocatorDomainType& pyMallocDomain, void* freePtr){
+void PythonHandler::onFree(const PythonAllocatorDomainType& pyMallocDomain, void* freePtr){
 	MALT_PYTHON_UNUSED(freePtr);
 	this->dummyStats->freeCountUp(pyMallocDomain);
 	
@@ -54,7 +54,7 @@ void PythonHandler::maltLogPythonFree(const PythonAllocatorDomainType& pyMallocD
  * Handles a Python calloc, fetch the backtrace stack and print it, updates statistics
  * FIXME: Behavior will change at some point to use MALT internals 
  */
-void PythonHandler::maltLogPythonCalloc(const PythonAllocatorDomainType& pyMallocDomain, size_t nbElements, size_t elementSize){
+void PythonHandler::onCalloc(const PythonAllocatorDomainType& pyMallocDomain, size_t nbElements, size_t elementSize){
 	assert(nbElements != 0);
 	assert(elementSize != 0);
 	this->dummyStats->callocCountUp(pyMallocDomain);
@@ -72,7 +72,7 @@ void PythonHandler::maltLogPythonCalloc(const PythonAllocatorDomainType& pyMallo
  * Handles a Python realloc, fetch the backtrace stack and print it, updates statistics
  * FIXME: Behavior will change at some point to use MALT internals 
  */
-void PythonHandler::maltLogPythonRealloc(const PythonAllocatorDomainType& pyMallocDomain, void* reallocPtr, size_t newSize){
+void PythonHandler::onRealloc(const PythonAllocatorDomainType& pyMallocDomain, void* reallocPtr, size_t newSize){
 	MALT_PYTHON_UNUSED(reallocPtr);
 	MALT_PYTHON_UNUSED(newSize);
 	assert(newSize != 0);

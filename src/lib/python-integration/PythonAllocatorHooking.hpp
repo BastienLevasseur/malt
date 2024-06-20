@@ -28,7 +28,8 @@ typedef struct MaltPythonAllocatorWrapper{
  * The entry point into the MALT Python allocator.
  * Makes the bridge between the orignal Python allocator and the MALT Python allocator.
  */
-class MaltPythonAllocator {
+//TODO: ""
+class PythonAllocatorHooking {
 
     //FIXME: "Wrapper" has two meanings... :
     // MaltPythonAllocatorWrapper_t & PythonAllocatorWrapper_t are wrappers in the sense they wrap the three domains
@@ -36,8 +37,8 @@ class MaltPythonAllocator {
     //FIXME: Rename one of those, probably the PythonDomainAllocatorWrapper
 
     public:
-        MaltPythonAllocator(PythonHandler* pythonHandler);
-        ~MaltPythonAllocator();
+        PythonAllocatorHooking(PythonHandler* pythonHandler);
+        ~PythonAllocatorHooking();
 
         void enable();
         void disable();
