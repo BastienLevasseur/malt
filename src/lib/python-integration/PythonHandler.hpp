@@ -25,7 +25,7 @@ namespace MALT {
             virtual void onRealloc(const PythonAllocatorDomainType& pyMallocDomain, void* reallocPtr, size_t newSize);
 
         private:
-            PythonHandler(const PythonHandler& ref);
+            PythonHandler(const PythonHandler& ref) = delete;
             /* FIXME: Will be replaced by MALT own concepts
             CallStackMap* callStackMap;
             GlobalStatistics* globalStats;

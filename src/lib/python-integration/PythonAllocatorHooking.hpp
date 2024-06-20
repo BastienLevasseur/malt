@@ -21,20 +21,14 @@ typedef struct MaltPythonAllocatorWrapper{
     PythonDomainAllocatorWrapper* allocatorRaw;
     PythonDomainAllocatorWrapper* allocatorMem;
     PythonDomainAllocatorWrapper* allocatorObj;
-} MaltPythonAllocatorWrapper_t;
+} CustomPythonAllocatorWrapper_t;
 
 
 /** 
  * The entry point into the MALT Python allocator.
- * Makes the bridge between the orignal Python allocator and the MALT Python allocator.
+ * Hooks the MALT Python allocator into the orignal Python allocator.
  */
-//TODO: ""
 class PythonAllocatorHooking {
-
-    //FIXME: "Wrapper" has two meanings... :
-    // MaltPythonAllocatorWrapper_t & PythonAllocatorWrapper_t are wrappers in the sense they wrap the three domains
-    // PythonDomainAllocatorWrapper is a wrapper in the sense it wraps the Python allocator
-    //FIXME: Rename one of those, probably the PythonDomainAllocatorWrapper
 
     public:
         PythonAllocatorHooking(PythonHandler* pythonHandler);
@@ -46,23 +40,25 @@ class PythonAllocatorHooking {
         bool isEnabled();
 
     private:
-        /* The original Python allocator */
+        /* Wrapper for the original Python allocator */
         PythonAllocatorWrapper_t* originalAllocator;
 
-        /* The MALT custom Python allocator */
+        /* Wrapper for the MALT Python allocator */
         PythonAllocatorWrapper_t* customAllocator;
     
         PythonHandler* pythonHandler;
+
+        /* The MALT custom Python allocator */
+        CustomPythonAllocatorWrapper_t* maltAllocatorWrapper;
 
         bool enabledFlag;
 
         PythonGuard* pythonGuard;
 
-        MaltPythonAllocatorWrapper_t* maltAllocatorWrapper;
 
     private:
-        MaltPythonAllocatorWrapper_t* initialiseMaltPythonAllocatorWrapper();
-        void destroyMaltPythonAllocatorWrapper(MaltPythonAllocatorWrapper_t* maltPythonAllocator);
+        CustomPythonAllocatorWrapper_t* initialiseMaltPythonAllocatorWrapper();
+        void destroyMaltPythonAllocatorWrapper(CustomPythonAllocatorWrapper_t* maltPythonAllocator);
 
         PythonAllocatorWrapper_t* initialisePythonAllocator();
         void destroyPythonAllocator(PythonAllocatorWrapper_t* pythonAllocator);

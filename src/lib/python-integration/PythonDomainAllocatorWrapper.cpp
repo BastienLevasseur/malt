@@ -13,9 +13,6 @@ namespace MALT {
         ;
     }
 
-    /* If size (re)alloced is zero we allocate one byte to avoid returning NULL */
-    /* We do not modify the parameters to avoid changing the behavior of the original Python allocator */
-
     void* PythonDomainAllocatorWrapper::onMalloc(void* context, size_t size){
 
         size_t alloced_size = size; 

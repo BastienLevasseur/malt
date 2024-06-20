@@ -120,7 +120,7 @@ PythonAllocatorHooking::~PythonAllocatorHooking(){
 
 	destroyPythonAllocator(this->customAllocator);
 
-	//FIXME: Python must be stopped before destroying the allocator, otherwise Python will have to functions to alloc/free and crash
+	//FIXME: Python must be stopped before destroying the allocator, otherwise Python will have no functions to alloc/free and crash
 	//FIXME: Maybe add an assert(Py_IsInitialized()==false)
 	destroyPythonAllocator(this->originalAllocator);
 
@@ -158,8 +158,8 @@ bool PythonAllocatorHooking::isEnabled(){
 /**
  * Initializer for a MALT Python allocator wrapper, wraps three MALT Python allocators into one structure. One for each domain.
  */
-MaltPythonAllocatorWrapper_t* PythonAllocatorHooking::initialiseMaltPythonAllocatorWrapper(){
-	MaltPythonAllocatorWrapper_t* allocator = new MaltPythonAllocatorWrapper_t();
+CustomPythonAllocatorWrapper_t* PythonAllocatorHooking::initialiseMaltPythonAllocatorWrapper(){
+	CustomPythonAllocatorWrapper_t* allocator = new CustomPythonAllocatorWrapper_t();
 	
 	allocator->allocatorRaw = new PythonDomainAllocatorWrapper(this->pythonHandler, PYMEM_DOMAIN_RAW, this->pythonGuard, this->originalAllocator->allocatorRaw);
 	allocator->allocatorMem = new PythonDomainAllocatorWrapper(this->pythonHandler, PYMEM_DOMAIN_MEM, this->pythonGuard, this->originalAllocator->allocatorMem);
@@ -172,7 +172,7 @@ MaltPythonAllocatorWrapper_t* PythonAllocatorHooking::initialiseMaltPythonAlloca
  * Destroys a MALT Python allocator wrapper.
  * @param maltPythonAllocatorWrapper : The wrapper to be destroyed.
  */
-void PythonAllocatorHooking::destroyMaltPythonAllocatorWrapper(MaltPythonAllocatorWrapper_t* maltPythonAllocatorWrapper){
+void PythonAllocatorHooking::destroyMaltPythonAllocatorWrapper(CustomPythonAllocatorWrapper_t* maltPythonAllocatorWrapper){
 	delete maltPythonAllocatorWrapper->allocatorObj;
 	delete maltPythonAllocatorWrapper->allocatorMem;
 	delete maltPythonAllocatorWrapper->allocatorRaw;
