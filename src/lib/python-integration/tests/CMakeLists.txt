@@ -10,7 +10,7 @@ set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -g")
 add_definitions(-DCURRENT_SOURCE_DIR=\"${CMAKE_CURRENT_SOURCE_DIR}\")
 
 #####################################################
-set(TEST_NAMES TestPythonAllocatorOverride TestPythonAllocation TestPythonAllocationNullSizes)
+set(TEST_NAMES TestPythonAllocatorHooking TestPythonAllocatorNullSizes)
 
 #####################################################
 FOREACH(test_name ${TEST_NAMES})
