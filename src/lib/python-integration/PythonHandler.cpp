@@ -1,14 +1,15 @@
 #include "PythonHandler.hpp"
 #include "PythonBacktraceStack.hpp"
-#include "DummyLocation.hpp"
+#include "PythonLocation.hpp"
 
 //FIXME: Remove it at some point
 #define MALT_PYTHON_UNUSED(var) (void)(var)
 
 namespace MALT {
 
-PythonHandler::PythonHandler(DummyStatistics* dummyStats){
+PythonHandler::PythonHandler(DummyStatistics* dummyStats, PythonLocationTranslater* locationTranslater){
 	this->dummyStats = dummyStats;
+	this->locationTranslater = locationTranslater;
 }
 
 
@@ -26,11 +27,9 @@ void PythonHandler::onMalloc(const PythonAllocatorDomainType& pyMallocDomain, si
 	this->dummyStats->mallocCountUp(pyMallocDomain);
 	this->dummyStats->mallocSumUp(pyMallocDomain, size);
 
-	std::vector<DummyLocation> allocationBacktraceStackVector = getPythonBacktraceStack();
-	
-	for (auto& backtraceStack : allocationBacktraceStackVector){
-		std::cout << backtraceStack << std::endl;
-	}
+	std::vector<PythonLocation> allocationBacktraceStackVector = getPythonBacktraceStack();
+
+	locationTranslater->insertLocations(pyMallocDomain, allocationBacktraceStackVector);
 }
 
 
@@ -42,7 +41,7 @@ void PythonHandler::onFree(const PythonAllocatorDomainType& pyMallocDomain, void
 	MALT_PYTHON_UNUSED(freePtr);
 	this->dummyStats->freeCountUp(pyMallocDomain);
 	
-	std::vector<DummyLocation> freeBacktraceStackVector = getPythonBacktraceStack();
+	std::vector<PythonLocation> freeBacktraceStackVector = getPythonBacktraceStack();
 	
 	for (auto& backtraceStack : freeBacktraceStackVector){
 		std::cout << backtraceStack << std::endl;
@@ -60,7 +59,7 @@ void PythonHandler::onCalloc(const PythonAllocatorDomainType& pyMallocDomain, si
 	this->dummyStats->callocCountUp(pyMallocDomain);
 	this->dummyStats->callocSumUp(pyMallocDomain, nbElements*elementSize);
 
-	std::vector<DummyLocation> callocBacktraceStackVector = getPythonBacktraceStack();
+	std::vector<PythonLocation> callocBacktraceStackVector = getPythonBacktraceStack();
 
 	for (auto& backtraceStack : callocBacktraceStackVector){
 		std::cout << backtraceStack << std::endl;
@@ -79,7 +78,7 @@ void PythonHandler::onRealloc(const PythonAllocatorDomainType& pyMallocDomain, v
 
 	this->dummyStats->reallocCountUp(pyMallocDomain);
 
-	std::vector<DummyLocation> reallocBacktraceStackVector = getPythonBacktraceStack();
+	std::vector<PythonLocation> reallocBacktraceStackVector = getPythonBacktraceStack();
 
 	for (auto& backtraceStack : reallocBacktraceStackVector){
 		std::cout << backtraceStack << std::endl;

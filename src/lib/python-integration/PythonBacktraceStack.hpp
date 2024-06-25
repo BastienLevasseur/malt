@@ -2,10 +2,10 @@
 #define PythonBacktraceStack_hpp
 
 #include "Python.h"
-#include "DummyLocation.hpp"
+#include "PythonLocation.hpp"
 #include <vector>
 
 namespace MALT{
-    std::vector<DummyLocation> getPythonBacktraceStack(void);
+    std::vector<PythonLocation> getPythonBacktraceStack(void);
 }
 #endif //PythonBacktraceStack_hpp

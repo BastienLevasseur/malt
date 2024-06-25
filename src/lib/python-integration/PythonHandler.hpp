@@ -3,6 +3,7 @@
 
 #include "DummyStatistics.hpp"
 #include "PythonAllocatorDomainType.hpp"
+#include "DummyLocationTranslater.hpp"
 
 namespace MALT {
 
@@ -13,7 +14,7 @@ namespace MALT {
     class PythonHandler {
             
         public:
-            PythonHandler(DummyStatistics* dummsyStats);
+            PythonHandler(DummyStatistics* dummsyStats, PythonLocationTranslater* locationTranslater);
             ~PythonHandler();
 
             virtual void onMalloc(const PythonAllocatorDomainType& pyMallocDomain, size_t size);
@@ -34,6 +35,7 @@ namespace MALT {
 
             //FIXME: Placeholder, will be replaced by MALT own statistics
             DummyStatistics* dummyStats;
+            PythonLocationTranslater* locationTranslater;
     };
 }
 

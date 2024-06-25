@@ -7,8 +7,11 @@ namespace MALT {
  * We use C defined NULL since the Python interpreter is written in C.
  * FIXME: Return type will change by the already existing MALT concept
  */
-std::vector<DummyLocation> getPythonBacktraceStack(void){
-    std::vector<DummyLocation> pythonBacktraceStack;
+//TODO: Register into the PythonLocationTranslater
+//TODO: Construct and return Stack*
+//TODO: Move to PythonHandler
+std::vector<PythonLocation> getPythonBacktraceStack(void){
+    std::vector<PythonLocation> pythonBacktraceStack;
 
     //If the Python interpreter is not correctly initialised, can't get the backtrace stack
 	if (_PyThreadState_UncheckedGet() == NULL){
@@ -49,8 +52,10 @@ std::vector<DummyLocation> getPythonBacktraceStack(void){
 		currentLineNumber = PyFrame_GetLineNumber(currentFrame);
 
         //FIXME: This will change into MALT location concept
-		DummyLocation formatedDummyLocation = DummyLocation(currentFileName, currentFrameName, currentLineNumber, (void*) currentPyCode);
+		PythonLocation formatedDummyLocation = PythonLocation(currentFileName, currentFrameName, currentLineNumber);
         
+
+		//TODO: Try Py_DECREF() instead
 
         //Valid names with a single chararacter are not alloced, so we don't free them
         if (strncmp((currentFileName + 1), "\0", 1) != 0){
