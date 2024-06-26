@@ -16,12 +16,14 @@ class PythonLocationTranslater {
     public:
         PythonLocationTranslater();
         ~PythonLocationTranslater(void);
-        void insertLocation(const PythonLocation& location);
+        UniqueID insertLocation(PythonLocation& location);
 
         void fillTranslationMap();
         PythonLocation translateID(UniqueID& uniqueID);
 
         void ensureIDsAreUnique();
+
+        bool containsLocation(PythonLocation& location);
         
         friend std::ostream& operator << (std::ostream &out, PythonLocationTranslater& locationTranslater);
         

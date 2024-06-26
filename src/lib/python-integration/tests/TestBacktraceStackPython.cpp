@@ -12,19 +12,45 @@
 using namespace MALT;
 using namespace testing;
 
+PythonLocationTranslater* gblLocationTranslater = nullptr;
+
 int main(int argc, char** argv){
-    PythonLocationTranslater* locationTranslater = new PythonLocationTranslater();
+    gblLocationTranslater = new PythonLocationTranslater();
     DummyStatistics* dummyStats = new DummyStatistics();
-    PythonHandler* pythonHandler = new PythonHandler(dummyStats, locationTranslater);
+    PythonHandler* pythonHandler = new PythonHandler(dummyStats, gblLocationTranslater);
     PythonAllocatorHooking* allocatorHook = new PythonAllocatorHooking(pythonHandler);
 
-    allocatorHook->enable();
-}
+    char* args[2] =  {"TestBacktraceStackPython", "/home/bastienlevasseur/malt/src/lib/python-integration/tests/PythonFile.py"};
 
-TEST(tmpTest, test){
-    char* args[2] =  {"", "TestBacktracePython.py"};
+    allocatorHook->enable();
     PythonInterpreterStarter::startPythonInterpreter(1, args);
 
-    EXPECT_EQ(0, 1);
+    ::testing::InitGoogleTest(&argc, argv);
+	return RUN_ALL_TESTS();
 }
 
+TEST(TestBacktraceStack, TestMain){
+    std::cout << *gblLocationTranslater << std::endl;
+    getchar();
+    PythonLocation mainLoc = PythonLocation("/home/bastienlevasseur/malt/src/lib/python-integration/tests/PythonFile.py", "<module>", 10);
+
+    EXPECT_TRUE(gblLocationTranslater->containsLocation(mainLoc));
+}
+
+TEST(TestBacktraceStack, TestFoo){
+    PythonLocation fooLoc = PythonLocation("/home/bastienlevasseur/malt/src/lib/python-integration/tests/PythonFile.py", "foo", 7);
+
+    EXPECT_TRUE(gblLocationTranslater->containsLocation(fooLoc));
+}
+
+TEST(TestBacktraceStack, TestBar){
+    PythonLocation barLoc = PythonLocation("/home/bastienlevasseur/malt/src/lib/python-integration/tests/PythonFile.py", "bar", 2);
+
+    EXPECT_TRUE(gblLocationTranslater->containsLocation(barLoc));
+}
+
+TEST(TestBacktraceStack, TestFalse){
+    PythonLocation barLoc = PythonLocation("/home/bastienlevasseur/malt/src/lib/python-integration/tests/PythonFile.py", "fdbksudfkbjldfsbjkdfsbjkdfbjksdksjqf", 2);
+
+    EXPECT_FALSE(gblLocationTranslater->containsLocation(barLoc));
+}

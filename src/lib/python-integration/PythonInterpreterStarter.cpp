@@ -28,7 +28,7 @@ namespace MALT{
 	//PyConfig_SetString(&pyConfig, &pyConfig.executable, pyInterpreter);
 
 	//Set argc/argv
-	PyConfig_SetBytesArgv(&pyConfig, argc, &argv[0]);
+	PyConfig_SetBytesArgv(&pyConfig, argc, argv);
 
 	//Set the config
 	PyConfig_Read(&pyConfig);

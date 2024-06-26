@@ -18,18 +18,19 @@ PythonLocationTranslater::~PythonLocationTranslater(void){
     ;
 }
 
-void PythonLocationTranslater::insertLocation(const PythonLocation& location){
+UniqueID PythonLocationTranslater::insertLocation(PythonLocation& location){
 
     auto emplacePair = this->mapLocToID.emplace(location, this->uniqueID);
 
     if (emplacePair.second == true){
         /* If true then this location was never visited before, we return a new UniqueID */
         this->uniqueID++;
+        return this->uniqueID;
     }else{
         /* Else, this location has been visited before, we return some other UniqueID */
         assert(location == emplacePair.first->first);
-    }
-    
+        return emplacePair.first->second;
+    }  
 }
 
 
@@ -62,6 +63,11 @@ void PythonLocationTranslater::ensureIDsAreUnique(){
     }
 }
 
+bool PythonLocationTranslater::containsLocation(PythonLocation &location){
+    auto tryIterator = this->mapLocToID.find(location);
+
+    return tryIterator != this->mapLocToID.end();
+}
 
 std::ostream& operator << (std::ostream &out, PythonLocationTranslater& locationTranslater){
     std::stringstream ans;
