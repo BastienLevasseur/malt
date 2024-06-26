@@ -10,6 +10,10 @@ namespace MALT{
 
 	const wchar_t* pyProgramName = nullptr;
 
+	if (argc > 1){
+		pyProgramName = Py_DecodeLocale(argv[1], nullptr);
+	}
+
 	//FIXME: Hardcoded, need to search with CMake TODO: Is this really needed ?? 
 	//const wchar_t* pyLib = Py_DecodeLocale("/user/local/bin/python3.12", nullptr);
 	//const wchar_t* pyInterpreter = Py_DecodeLocale("/home/bastienlevasseur/venv3.12/bin/python3.12", nullptr);

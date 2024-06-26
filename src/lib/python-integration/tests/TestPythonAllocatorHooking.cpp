@@ -1,19 +1,18 @@
 /********************  HEADERS  *********************/
-
 #include <gtest/gtest.h>
 #include <gmock/gmock.h>
 #include <common/GTestHelper.hpp>
 
 #include <python-integration/PythonAllocatorHooking.hpp>
 #include <python-integration/PythonInterpreterStarter.hpp>
+#include <python-integration/PythonLocationTranslater.hpp>
 
 using namespace MALT;
 using namespace testing;
 
-
 class MockPythonHandler : public PythonHandler {
 	public:
-		MockPythonHandler(DummyStatistics* dummyStats) : PythonHandler(dummyStats){};
+		MockPythonHandler(DummyStatistics* dummyStats, PythonLocationTranslater* dummyLocationTranslater) : PythonHandler(dummyStats, dummyLocationTranslater){};
 		MOCK_METHOD(void, onMalloc, (const PythonAllocatorDomainType& pyMallocDomain, size_t size), (override));
 		MOCK_METHOD(void, onFree, (const PythonAllocatorDomainType& pyMallocDomain, void* ptr), (override));
 		MOCK_METHOD(void, onCalloc, (const PythonAllocatorDomainType& pyMallocDomain, size_t nbElements, size_t elementSize), (override));
@@ -30,6 +29,7 @@ class TestPythonAllocatorHooking : public testing::Test {
 
 	protected:
 		DummyStatistics* dummyStats;
+		PythonLocationTranslater* dummyLocationTranslater;
 		MockPythonHandler* mockPythonHandler;
 		PythonAllocatorHooking* pythonAllocatorHook;
 };
@@ -38,8 +38,8 @@ class TestPythonAllocatorHooking : public testing::Test {
 
 void TestPythonAllocatorHooking::SetUp(){
 	this->dummyStats = new DummyStatistics();
-	this->mockPythonHandler = new MockPythonHandler(dummyStats);
-
+	this->dummyLocationTranslater = new PythonLocationTranslater();
+	this->mockPythonHandler = new MockPythonHandler(dummyStats, dummyLocationTranslater);
 
 	PythonInterpreterStarter::startPythonInterpreter(0, nullptr);
 
@@ -53,6 +53,7 @@ void TestPythonAllocatorHooking::TearDown(){
 
 	delete this->pythonAllocatorHook;
 	delete this->mockPythonHandler;
+	delete this->dummyLocationTranslater;
 	delete this->dummyStats;
 }
 

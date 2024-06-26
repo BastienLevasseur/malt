@@ -3,6 +3,7 @@
 
 #include "DummyStatistics.hpp"
 #include "PythonAllocatorDomainType.hpp"
+#include "PythonLocationTranslater.hpp"
 
 namespace MALT {
 
@@ -13,7 +14,7 @@ namespace MALT {
     class PythonHandler {
             
         public:
-            PythonHandler(DummyStatistics* dummsyStats);
+            PythonHandler(DummyStatistics* dummsyStats, PythonLocationTranslater* locationTranslater);
             ~PythonHandler();
 
             virtual void onMalloc(const PythonAllocatorDomainType& pyMallocDomain, size_t size);
@@ -24,8 +25,10 @@ namespace MALT {
 
             virtual void onRealloc(const PythonAllocatorDomainType& pyMallocDomain, void* reallocPtr, size_t newSize);
 
+            void getPythonBacktraceStack(void);
+
         private:
-            PythonHandler(const PythonHandler& ref);
+            PythonHandler(const PythonHandler& ref) = delete;
             /* FIXME: Will be replaced by MALT own concepts
             CallStackMap* callStackMap;
             GlobalStatistics* globalStats;
@@ -34,6 +37,7 @@ namespace MALT {
 
             //FIXME: Placeholder, will be replaced by MALT own statistics
             DummyStatistics* dummyStats;
+            PythonLocationTranslater* locationTranslater;
     };
 }
 

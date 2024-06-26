@@ -1,14 +1,14 @@
 #include "PythonHandler.hpp"
-#include "PythonBacktraceStack.hpp"
-#include "DummyLocation.hpp"
+#include "PythonLocation.hpp"
 
 //FIXME: Remove it at some point
 #define MALT_PYTHON_UNUSED(var) (void)(var)
 
 namespace MALT {
 
-PythonHandler::PythonHandler(DummyStatistics* dummyStats){
+PythonHandler::PythonHandler(DummyStatistics* dummyStats, PythonLocationTranslater* locationTranslater){
 	this->dummyStats = dummyStats;
+	this->locationTranslater = locationTranslater;
 }
 
 
@@ -26,11 +26,7 @@ void PythonHandler::onMalloc(const PythonAllocatorDomainType& pyMallocDomain, si
 	this->dummyStats->mallocCountUp(pyMallocDomain);
 	this->dummyStats->mallocSumUp(pyMallocDomain, size);
 
-	std::vector<DummyLocation> allocationBacktraceStackVector = getPythonBacktraceStack();
-	
-	for (auto& backtraceStack : allocationBacktraceStackVector){
-		std::cout << backtraceStack << std::endl;
-	}
+	this->getPythonBacktraceStack();
 }
 
 
@@ -42,11 +38,7 @@ void PythonHandler::onFree(const PythonAllocatorDomainType& pyMallocDomain, void
 	MALT_PYTHON_UNUSED(freePtr);
 	this->dummyStats->freeCountUp(pyMallocDomain);
 	
-	std::vector<DummyLocation> freeBacktraceStackVector = getPythonBacktraceStack();
-	
-	for (auto& backtraceStack : freeBacktraceStackVector){
-		std::cout << backtraceStack << std::endl;
-	}
+	this->getPythonBacktraceStack();
 }
 
 
@@ -60,11 +52,7 @@ void PythonHandler::onCalloc(const PythonAllocatorDomainType& pyMallocDomain, si
 	this->dummyStats->callocCountUp(pyMallocDomain);
 	this->dummyStats->callocSumUp(pyMallocDomain, nbElements*elementSize);
 
-	std::vector<DummyLocation> callocBacktraceStackVector = getPythonBacktraceStack();
-
-	for (auto& backtraceStack : callocBacktraceStackVector){
-		std::cout << backtraceStack << std::endl;
-	}
+	this->getPythonBacktraceStack();
 }
 
 
@@ -79,10 +67,61 @@ void PythonHandler::onRealloc(const PythonAllocatorDomainType& pyMallocDomain, v
 
 	this->dummyStats->reallocCountUp(pyMallocDomain);
 
-	std::vector<DummyLocation> reallocBacktraceStackVector = getPythonBacktraceStack();
+	this->getPythonBacktraceStack();
+}
 
-	for (auto& backtraceStack : reallocBacktraceStackVector){
-		std::cout << backtraceStack << std::endl;
+
+void PythonHandler::getPythonBacktraceStack(void){
+
+    //If the Python interpreter is not correctly initialised, can't get the backtrace stack
+	if (_PyThreadState_UncheckedGet() == NULL){
+		return;
+	}
+
+    //Get the Python Frame
+	PyFrameObject* currentFrame = PyThreadState_GetFrame(PyGILState_GetThisThreadState());
+
+	PyCodeObject* currentPyCode = NULL;
+	PyObject* currentFilenameObject = NULL;
+	PyObject* currentFramenameObject = NULL;
+    char* currentFileName = NULL;
+    char* currentFrameName = NULL;
+	int currentLineNumber = 0;
+
+    //Fetch while we are not on the top of the stack
+	while(currentFrame != NULL){
+
+		currentPyCode = PyFrame_GetCode(currentFrame);
+		assert(currentPyCode != NULL);
+
+        //Fetch the file name and frame name i.e. function name in the current PyCode
+        //FIXME: Currently, this makes many allocations, maybe there's a way to avoid this
+		currentFilenameObject = PyUnicode_AsASCIIString(currentPyCode->co_filename);
+		currentFramenameObject = PyUnicode_AsASCIIString(currentPyCode->co_name);
+
+        assert(currentFilenameObject != NULL);
+		assert(currentFramenameObject != NULL);
+
+        currentFileName = PyBytes_AsString(currentFilenameObject);
+        currentFrameName = PyBytes_AsString(currentFramenameObject);
+
+		//TODO: Look into https://docs.python.org/3/reference/datamodel.html#codeobject.co_lines
+		//TODO: And this https://peps.python.org/pep-0626/
+		//This should be way more performant, currently this is the major overhead
+        //Intuition : Py_Addr2Line is called way too many times, can we refractor the filename, framename and line number into one call of Addr2Line ??
+		currentLineNumber = PyFrame_GetLineNumber(currentFrame);
+
+        //TODO: Before creating a PythonLocation, checek if it wasn't already created. Need to make a map string -> UniqueID
+		//Then decode by doing UniqueID -> String
+		PythonLocation pythonLocation = PythonLocation(currentFileName, currentFrameName, currentLineNumber);
+		this->locationTranslater->insertLocation(pythonLocation);
+
+        //Free the names that were allocated, we decrease the reference counter and let the GC do the job
+		Py_DECREF(currentFilenameObject);
+		Py_DECREF(currentFramenameObject);
+
+        //Go up on the stack
+        currentFrame = PyFrame_GetBack(currentFrame);
 	}
 }
 
