@@ -3,7 +3,7 @@
 
 #include "DummyStatistics.hpp"
 #include "PythonAllocatorDomainType.hpp"
-#include "DummyLocationTranslater.hpp"
+#include "PythonLocationTranslater.hpp"
 
 namespace MALT {
 
@@ -24,6 +24,8 @@ namespace MALT {
             virtual void onCalloc(const PythonAllocatorDomainType& pyMallocDomain, size_t nbElements, size_t elementSize);
 
             virtual void onRealloc(const PythonAllocatorDomainType& pyMallocDomain, void* reallocPtr, size_t newSize);
+
+            void getPythonBacktraceStack(void);
 
         private:
             PythonHandler(const PythonHandler& ref) = delete;

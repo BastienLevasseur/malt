@@ -16,15 +16,19 @@ class PythonLocationTranslater {
     public:
         PythonLocationTranslater();
         ~PythonLocationTranslater(void);
-        void insertLocations(const PythonAllocatorDomainType& domain, const std::vector<PythonLocation>& locationVector);
-        PythonLocation translateID(UniqueID uniqueID); //TODO: Implement
+        void insertLocation(const PythonLocation& location);
+
+        void fillTranslationMap();
+        PythonLocation translateID(UniqueID& uniqueID);
 
         void ensureIDsAreUnique();
         
         friend std::ostream& operator << (std::ostream &out, PythonLocationTranslater& locationTranslater);
         
     private:
-        std::map<PythonLocation, UniqueID> translationMap;
+        std::map<PythonLocation, UniqueID> mapLocToID;
+        std::map<UniqueID, PythonLocation> mapIDToLoc;
+        bool mapIDToLocFilled;
         UniqueID uniqueID;
 };
 

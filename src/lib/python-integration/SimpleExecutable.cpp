@@ -2,7 +2,7 @@
 #include "PythonHandler.hpp"
 #include "PythonAllocatorHooking.hpp"
 #include "PythonInterpreterStarter.hpp"
-#include "DummyLocationTranslater.hpp"
+#include "PythonLocationTranslater.hpp"
 #include <iostream>
 
 using namespace MALT;

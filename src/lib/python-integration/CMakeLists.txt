@@ -6,16 +6,15 @@ set(MALT_LIB_SRC
     DummyAllocationMap.cpp
     
     DummyStatistics.cpp
-    DummyLocationTranslater.cpp
 
     PythonAllocatorDomainType.hpp    
     PythonAllocatorHooking.cpp
-    PythonBacktraceStack.cpp
     PythonDomainAllocatorWrapper.cpp
     PythonGuard.cpp
     PythonHandler.cpp
     PythonInterpreterStarter.cpp
     PythonLocation.cpp
+    PythonLocationTranslater.cpp
 )
 
 ######################################################
